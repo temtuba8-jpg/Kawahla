@@ -1,0 +1,297 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap');
+
+:root {
+    --primary-red: #C90016;       /* أحمر الحدث الناري الجاذب والقوي */
+    --dark-red: #8B0000;          /* أحمر داكن للعمق والخلفيات */
+    --gold-color: #E5C158;        /* ذهبي مضيء وفخم */
+    --light-gold: #FDF6E2;        /* ذهبي فاتح للخلفيات */
+    --dark-bg: #121212;           /* أسود فاحم احترافي */
+    --white: #ffffff;
+}
+
+body {
+    font-family: 'Cairo', sans-serif;
+    background-color: #f7f9fc;
+    color: #222;
+    margin: 0;
+    direction: rtl;
+    overflow-x: hidden;
+}
+
+/* Header & Glowing Pulse Logo */
+header {
+    background: linear-gradient(135deg, var(--primary-red), var(--dark-red));
+    color: var(--white);
+    border-bottom: 4px solid var(--gold-color);
+    padding: 12px 0;
+    box-shadow: 0 4px 25px rgba(201, 0, 22, 0.35);
+}
+
+header .navbar-brand {
+    color: var(--gold-color) !important;
+    font-weight: 900;
+    font-size: 1.8rem;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.4);
+}
+
+/* حركة نبض الشعار الفخمة (Glowing Pulse) */
+@keyframes logoPulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(229, 193, 88, 0.7);
+    }
+    70% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 12px rgba(229, 193, 88, 0);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(229, 193, 88, 0);
+    }
+}
+
+.pulse-logo {
+    width: 58px;
+    height: 58px;
+    object-fit: contain;
+    background: #fff;
+    border-radius: 50%;
+    padding: 3px;
+    border: 2px solid var(--gold-color);
+    animation: logoPulse 2s infinite ease-in-out;
+}
+
+nav a {
+    color: var(--white) !important;
+    font-weight: 600;
+    margin: 0 8px;
+    transition: 0.3s;
+}
+
+nav a:hover {
+    color: var(--gold-color) !important;
+}
+
+/* Cards with Luxury Shadows */
+.card {
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(229, 193, 88, 0.15);
+    background: #ffffff;
+    transition: all 0.3s ease;
+    margin-bottom: 24px;
+}
+
+.card:hover {
+    box-shadow: 0 12px 35px rgba(201, 0, 22, 0.12);
+    transform: translateY(-3px);
+}
+
+/* Official ID Cards (Absher Style with Al-Hadath Identity) */
+.official-id-card {
+    width: 100%;
+    max-width: 480px;
+    background: linear-gradient(135deg, #ffffff 0%, #fffdf9 100%);
+    border: 3px solid var(--gold-color);
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(201, 0, 22, 0.25);
+    position: relative;
+    margin: 20px auto;
+    overflow: hidden;
+    direction: rtl;
+    text-align: right;
+}
+
+.official-id-header {
+    background: linear-gradient(135deg, var(--primary-red), var(--dark-red));
+    color: var(--white);
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 3px solid var(--gold-color);
+}
+
+.official-id-header img.card-logo {
+    width: 55px;
+    height: 55px;
+    object-fit: contain;
+    background: #fff;
+    border-radius: 50%;
+    padding: 3px;
+    border: 2px solid var(--gold-color);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+}
+
+.official-id-body {
+    padding: 22px;
+}
+
+.id-photo-frame {
+    width: 110px;
+    height: 135px;
+    border: 2px solid var(--gold-color);
+    border-radius: 12px;
+    overflow: hidden;
+    background: #eee;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    margin: 0 auto;
+}
+
+.id-photo-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.id-info-row {
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+    border-bottom: 1px dashed #e5d8b8;
+    padding-bottom: 5px;
+}
+
+.id-info-row strong {
+    color: var(--primary-red);
+}
+
+.official-id-footer {
+    background-color: var(--light-gold);
+    padding: 10px 20px;
+    text-align: center;
+    font-size: 0.85rem;
+    color: #333;
+    border-top: 1px solid var(--gold-color);
+    font-weight: bold;
+}
+
+.id-blur {
+    filter: blur(8px);
+    user-select: none;
+    pointer-events: none;
+}
+
+.verification-notice {
+    background-color: var(--light-gold);
+    color: #724c00;
+    border: 1px solid var(--gold-color);
+    padding: 18px;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: bold;
+    margin-top: 15px;
+    box-shadow: 0 6px 20px rgba(229, 193, 88, 0.25);
+}
+
+/* Professional Royal Red Footer Styling (Arab Tribe Identity) */
+.footer-section {
+    background: linear-gradient(135deg, #500000 0%, #2b0000 100%) !important; /* أحمر داكن ملكي فاخر متناسق مع هيبة القبيلة */
+    color: #ffffff !important;      /* لون أبيض ناصع وواضح تماماً */
+    border-top: 4px solid var(--gold-color);
+    padding: 60px 0 25px 0;
+    margin-top: 70px;
+    direction: rtl;
+    text-align: right;
+    box-shadow: 0 -15px 40px rgba(139, 0, 0, 0.4);
+}
+
+.footer-heading {
+    color: var(--gold-color);
+    font-weight: 700;
+    font-size: 1.15rem;
+    margin-bottom: 20px;
+    position: relative;
+    padding-bottom: 8px;
+    border-bottom: 2px solid rgba(229, 193, 88, 0.3);
+}
+
+.footer-logo {
+    width: 52px;
+    height: 52px;
+    object-fit: contain;
+    background: #fff;
+    border-radius: 50%;
+    padding: 3px;
+    border: 2px solid var(--gold-color);
+}
+
+.text-gold {
+    color: var(--gold-color) !important;
+}
+
+.footer-desc, .footer-text {
+    color: #fceea7 !important; /* ذهبي فاتح ناصع وواضح جداً على الخلفية الحمراء الملكية */
+}
+
+.footer-links li {
+    margin-bottom: 12px;
+}
+
+.footer-links a {
+    color: #ffffff !important; /* أبيض ناصع للقراءة المريحة */
+    text-decoration: none;
+    font-size: 0.92rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.footer-links a:hover {
+    color: var(--gold-color) !important;
+    transform: translateX(-5px);
+}
+
+.footer-links a i {
+    font-size: 0.75rem;
+    color: var(--gold-color);
+}
+
+.footer-quote {
+    font-size: 0.9rem;
+    background: rgba(229, 193, 88, 0.12);
+    border-right: 3px solid var(--gold-color);
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-top: 15px;
+    line-height: 1.6;
+    color: var(--light-gold) !important;
+    font-weight: bold;
+}
+
+.social-btn {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--gold-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: 0.3s;
+    border: 1px solid rgba(229, 193, 88, 0.3);
+    text-decoration: none;
+}
+
+.social-btn:hover {
+    background: var(--gold-color);
+    color: #500000;
+    border-color: var(--gold-color);
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(229, 193, 88, 0.5);
+}
+
+.footer-divider {
+    border-color: rgba(229, 193, 88, 0.3) !important;
+}
+
+/* Custom Buttons & Badges */
+.btn-danger {
+    background-color: var(--primary-red) !important;
+    border-color: var(--primary-red) !important;
+    box-shadow: 0 4px 12px rgba(201, 0, 22, 0.3);
+}
+
+.btn-danger:hover {
+    background-color: #a80012 !important;
+}

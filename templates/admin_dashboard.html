@@ -1,0 +1,297 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <h2 class="text-danger fw-bold mb-0"><i class="fas fa-user-shield"></i> لوحة تحكم الآدمن الشاملة</h2>
+        <a href="{{ url_for('moderator_dashboard') }}" class="btn btn-warning fw-bold text-dark shadow-sm"><i class="fas fa-check-circle"></i> صفحة مشرفين التوثيق</a>
+    </div>
+
+    <!-- تبويبات التنقل داخل لوحة الآدمن -->
+    <ul class="nav nav-tabs mb-4 border-danger flex-wrap" id="adminTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active fw-bold text-danger" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button"><i class="fas fa-users me-1"></i> إدارة المستخدمين والتوثيق</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold text-danger" id="adduser-tab" data-bs-toggle="tab" data-bs-target="#adduser" type="button"><i class="fas fa-user-plus me-1"></i> إضافة يوزر / مشرف جديد</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold text-danger" id="forum-tab" data-bs-toggle="tab" data-bs-target="#forum" type="button"><i class="fas fa-comments me-1"></i> إضافة منشور للمنتدى</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold text-danger" id="news-tab" data-bs-toggle="tab" data-bs-target="#news" type="button"><i class="fas fa-newspaper me-1"></i> إدارة ونشر الأخبار</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold text-danger" id="slider-tab" data-bs-toggle="tab" data-bs-target="#slider" type="button"><i class="fas fa-images me-1"></i> إدارة سلايدر الرئيسية</button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="adminTabsContent">
+        
+        <!-- ================= القسم الأول: إدارة المستخدمين والتوثيق ================= -->
+        <div class="tab-pane fade show active" id="users" role="tabpanel">
+            <div class="card p-3 mb-4 shadow-sm bg-light border-danger">
+                <form method="GET" action="{{ url_for('admin_dashboard') }}" class="row g-3 align-items-center">
+                    <div class="col-md-9">
+                        <input type="text" name="q" class="form-control" placeholder="ابحث باسم الكاهلي أو اسم المستخدم..." value="{{ request.args.get('q', '') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-danger w-100 fw-bold"><i class="fas fa-search"></i> بحث في اليوزرات</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="table-responsive bg-white rounded shadow p-3">
+                <table class="table table-striped table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>الصورة</th>
+                            <th>الاسم الكامل</th>
+                            <th>اليوزر (ID)</th>
+                            <th>الفرع</th>
+                            <th>الرقم الوطني</th>
+                            <th>الحالة</th>
+                            <th>اللقب والدور</th>
+                            <th>الإجراءات الشاملة (كلمة المرور والحذف)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users %}
+                        <tr>
+                            <td><img src="{{ url_for('static', filename='uploads/' + u.profile_pic) }}" class="rounded-circle border border-danger" width="45" height="45" style="object-fit: cover;"></td>
+                            <td class="fw-bold">{{ u.full_name }}</td>
+                            <td><code>{{ u.username }}</code></td>
+                            <td><span class="badge bg-secondary">{{ u.branch }}</span></td>
+                            <td>{{ u.national_id }}</td>
+                            <td>
+                                {% if u.is_verified %}
+                                    <span class="badge bg-success">موثق ✅</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">قيد المراجعة ⏳</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-danger">
+                                    {% if u.title_type == 'أمير القبيلة' %}👑{% elif u.title_type == 'ملك الفروع' %}👑{% elif u.title_type == 'مهندس القبيلة' %}🛠️{% elif u.title_type == 'رئيس الرابطة' %}🏛️{% else %}👤{% endif %}
+                                    {{ u.title_type }}
+                                </span><br>
+                                <small class="text-muted">الدور: {{ u.role }}</small>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1 flex-wrap mb-2">
+                                    {% if not u.is_verified %}
+                                        <a href="{{ url_for('verify_user', user_id=u.id) }}" class="btn btn-sm btn-success" title="توثيق"><i class="fas fa-check"></i></a>
+                                    {% else %}
+                                        <a href="{{ url_for('reject_user', user_id=u.id) }}" class="btn btn-sm btn-warning" title="إلغاء التوثيق للتعديل"><i class="fas fa-undo"></i></a>
+                                    {% endif %}
+                                    <a href="{{ url_for('delete_user', user_id=u.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('هل أنت متأكد من حذف هذا المستخدم نهائياً؟')" title="حذف اليوزر"><i class="fas fa-trash"></i></a>
+                                </div>
+
+                                <form action="{{ url_for('change_password', user_id=u.id) }}" method="POST" class="mb-2 d-flex gap-1">
+                                    <input type="password" name="new_password" placeholder="كلمة سر جديدة" class="form-control form-control-sm" required style="width: 120px;">
+                                    <button type="submit" class="btn btn-sm btn-outline-dark" title="تغيير كلمة المرور"><i class="fas fa-key"></i></button>
+                                </form>
+
+                                <form action="{{ url_for('set_role_and_title', user_id=u.id) }}" method="POST">
+                                    <select name="role" class="form-select form-select-sm mb-1">
+                                        <option value="user" {% if u.role == 'user' %}selected{% endif %}>مستخدم عادي</option>
+                                        <option value="moderator" {% if u.role == 'moderator' %}selected{% endif %}>مشرف توثيق</option>
+                                        <option value="admin" {% if u.role == 'admin' %}selected{% endif %}>آدمن الموقع</option>
+                                    </select>
+                                    <select name="title_type" class="form-select form-select-sm mb-1">
+                                        <option value="عضو" {% if u.title_type == 'عضو' %}selected{% endif %}>عضو عادي</option>
+                                        <option value="أمير القبيلة" {% if u.title_type == 'أمير القبيلة' %}selected{% endif %}>👑 أمير القبيلة</option>
+                                        <option value="ملك الفروع" {% if u.title_type == 'ملك الفروع' %}selected{% endif %}>👑 ملك الفروع</option>
+                                        <option value="مهندس القبيلة" {% if u.title_type == 'مهندس القبيلة' %}selected{% endif %}>🛠️ مهندس القبيلة</option>
+                                        <option value="رئيس الرابطة" {% if u.title_type == 'رئيس الرابطة' %}selected{% endif %}>🏛️ رئيس الرابطة</option>
+                                        <option value="شخصية هامة" {% if u.title_type == 'شخصية هامة' %}selected{% endif %}>⭐ شخصية هامة</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-sm btn-primary w-100">حفظ اللقب والصلاحية</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ================= القسم الجديد: إضافة يوزر أو مشرف جديد ================= -->
+        <div class="tab-pane fade" id="adduser" role="tabpanel">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card p-4 shadow-sm border-danger">
+                        <h4 class="text-danger fw-bold mb-3"><i class="fas fa-user-plus"></i> إضافة مستخدم جديد أو مشرف توثيق</h4>
+                        <form action="{{ url_for('admin_add_user') }}" method="POST">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">اسم المستخدم (بالإنجليزية):</label>
+                                    <input type="text" name="username" class="form-control" placeholder="username" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">كلمة المرور:</label>
+                                    <input type="password" name="password" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">الاسم الكامل:</label>
+                                    <input type="text" name="full_name" class="form-control" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">الرقم الوطني:</label>
+                                    <input type="text" name="national_id" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">رقم الجوال:</label>
+                                    <input type="text" name="phone" class="form-control">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">الفرع القبلي:</label>
+                                    <input type="text" name="branch" class="form-control" placeholder="مثال: الحسانية، الحسونات...">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">صلاحية الحساب (الدور):</label>
+                                    <select name="role" class="form-select" required>
+                                        <option value="user">مستخدم عادي (عضو)</option>
+                                        <option value="moderator">مشرف توثيق</option>
+                                        <option value="admin">آدمن الموقع</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">اللقب الشرفي:</label>
+                                    <select name="title_type" class="form-select">
+                                        <option value="عضو">عضو</option>
+                                        <option value="أمير القبيلة">👑 أمير القبيلة</option>
+                                        <option value="ملك الفروع">👑 ملك الفروع</option>
+                                        <option value="مهندس القبيلة">🛠️ مهندس القبيلة</option>
+                                        <option value="رئيس الرابطة">🏛️ رئيس الرابطة</option>
+                                        <option value="شخصية هامة">⭐ شخصية هامة</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-danger w-100 fw-bold py-2"><i class="fas fa-save"></i> حفظ وإضافة الحساب مباشرة</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= القسم الجديد: إضافة منشور للمنتدى ================= -->
+        <div class="tab-pane fade" id="forum" role="tabpanel">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card p-4 shadow-sm border-danger">
+                        <h4 class="text-danger fw-bold mb-3"><i class="fas fa-edit"></i> إنشاء ونشر موضوع رئيسي في المنتدى</h4>
+                        <form action="{{ url_for('admin_add_forum_topic') }}" method="POST">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">عنوان الموضوع / المنشور:</label>
+                                <input type="text" name="title" class="form-control" placeholder="اكتب عنواناً جذاباً للمنتدى..." required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">محتوى الموضوع:</label>
+                                <textarea name="content" class="form-control" rows="5" placeholder="اكتب تفاصيل الموضوع أو النقاش هنا ليتمكن الأعضاء من التعليق عليه..." required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-danger w-100 fw-bold py-2"><i class="fas fa-paper-plane"></i> نشر الموضوع في المنتدى</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= القسم الثالث: إدارة ونشر الأخبار ================= -->
+        <div class="tab-pane fade" id="news" role="tabpanel">
+            <div class="row">
+                <div class="col-md-5 mb-4">
+                    <div class="card p-4 shadow-sm border-danger">
+                        <h4 class="text-danger fw-bold mb-3"><i class="fas fa-plus-circle"></i> إضافة خبر جديد للرئيسية</h4>
+                        <form action="{{ url_for('add_news') }}" method="POST" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">عنوان الخبر:</label>
+                                <input type="text" name="title" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">تاريخ الخبر:</label>
+                                <input type="text" name="date" class="form-control" placeholder="مثال: 20 مارس 2026" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">محتوى الخبر:</label>
+                                <textarea name="content" class="form-control" rows="4" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">صورة الخبر:</label>
+                                <input type="file" name="image" class="form-control" accept="image/*">
+                            </div>
+                            <button type="submit" class="btn btn-danger w-100 fw-bold">نشر الخبر فوراً</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-md-7">
+                    <h4 class="fw-bold text-dark mb-3">الأخبار المنشورة حالياً</h4>
+                    <div class="list-group">
+                        {% for n in news_list %}
+                        <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center mb-2 shadow-sm rounded border-start border-danger border-4">
+                            <div>
+                                <h6 class="fw-bold text-danger mb-1">{{ n.title }}</h6>
+                                <small class="text-muted"><i class="fas fa-calendar-alt text-gold me-1"></i> {{ n.date }}</small>
+                            </div>
+                            <a href="{{ url_for('delete_news', news_id=n.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('هل أنت متأكد من حذف هذا الخبر؟')"><i class="fas fa-trash"></i></a>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-light border text-center text-muted">لا توجد أخبار منشورة حالياً.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= القسم الرابع: إدارة سلايدر الرئيسية ================= -->
+        <div class="tab-pane fade" id="slider" role="tabpanel">
+            <div class="row">
+                <div class="col-md-5 mb-4">
+                    <div class="card p-4 shadow-sm border-danger">
+                        <h4 class="text-danger fw-bold mb-3"><i class="fas fa-images"></i> إضافة صورة للسلايدر المتحرك</h4>
+                        <form action="{{ url_for('add_slider') }}" method="POST" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">عنوان الشريحة (اختياري):</label>
+                                <input type="text" name="title" class="form-control">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">وصف الشريحة (اختياري):</label>
+                                <input type="text" name="description" class="form-control">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">صورة الشريحة (أفقية عالية الجودة):</label>
+                                <input type="file" name="image" class="form-control" accept="image/*" required>
+                            </div>
+                            <button type="submit" class="btn btn-danger w-100 fw-bold">رفع وإضافة للسلايدر</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-md-7">
+                    <h4 class="fw-bold text-dark mb-3">صور السلايدر الحالية في الرئيسية</h4>
+                    <div class="row">
+                        {% for s in sliders %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card shadow-sm border border-warning">
+                                <img src="{{ url_for('static', filename='uploads/' + s.image) }}" class="card-img-top" style="height: 130px; object-fit: cover;">
+                                <div class="card-body p-2 text-center">
+                                    <h6 class="fw-bold small text-danger mb-1">{{ s.title or 'بدون عنوان' }}</h6>
+                                    <a href="{{ url_for('delete_slider', slider_id=s.id) }}" class="btn btn-sm btn-danger w-100 mt-1" onclick="return confirm('حذف هذه الصورة من السلايدر؟')"><i class="fas fa-trash"></i> حذف الصورة</a>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="col-12"><div class="alert alert-light border text-center text-muted">لا توجد صور مضافة للسلايدر حالياً.</div></div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

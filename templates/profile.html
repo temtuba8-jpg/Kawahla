@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-9 text-center">
+        <h2 class="text-danger fw-bold mb-3">بوابة الكاهلي الرقمية</h2>
+        
+        {% if not user.is_verified %}
+            <div class="verification-notice mb-4">
+                <i class="fas fa-exclamation-triangle fa-2x mb-2 text-warning"></i>
+                <h4 class="fw-bold">قيد المراجعة والتحقيق من انتمائك لقبيلة الكواهلة</h4>
+                <p class="mb-0">البطاقة الشخصية مقيدة حالياً بـ Blur. جاري التحقق من مستنداتك ومكانك من قبل المشرفين والآدمن. بعد الاعتماد ستتمكن من استخدام البطاقة بكامل خدماتها.</p>
+            </div>
+        {% else %}
+            <div class="alert alert-success fw-bold py-3 shadow-sm mb-4" style="background-color: #F3E5AB; color: #8B0000; border: 2px solid #D4AF37;">
+                <i class="fas fa-crown fa-lg"></i> تم التحقق والتوثيق بنجاح! فأنت كاهلي ارفع راسك فوق أنت كاسماء تظلنا...
+            </div>
+        {% endif %}
+
+        <!-- حاوية تحتوي على أيقونة سوداس باس (خارج البطاقة) البطاقة نفسها -->
+        <div class="position-relative mx-auto" style="max-width: 650px;">
+            
+            <!-- أيقونة سوداس باس أصبحت خارج البطاقة تماماً وفي الأعلى -->
+            <div class="text-start mb-2" style="z-index: 10;">
+                <div class="d-inline-block text-center bg-white border border-warning rounded p-1 shadow-sm">
+                    <img src="{{ url_for('static', filename='uploads/1.PNG') }}" alt="سوداس باس" width="35" height="35" class="rounded-circle">
+                    <div style="font-size: 8px;" class="badge bg-dark text-warning mt-1">سوداس باس قريباً</div>
+                </div>
+            </div>
+
+            <!-- بطاقة الهوية الرسمية المطابقة تماماً للصورة المرفقة (مع ID مخصص للطباعة) -->
+            <div id="printable-card" class="card id-card {% if not user.is_verified %}id-blur{% endif %} shadow-lg border-2 border-danger rounded-4 overflow-hidden position-relative" style="background: linear-gradient(135deg, #fdfbf7 0%, #f1eae1 100%);">
+                
+                <!-- علامة مائية خلفية شفافة للبطاقة -->
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.04; font-size: 130px; font-weight: bold; z-index: 0; pointer-events: none;">
+                    کواهلة
+                </div>
+
+                <div class="card-body p-3 position-relative" style="z-index: 1;">
+                    
+                    <!-- رأسية البطاقة (الشعار، الجمهورية، رقم التسلسل) -->
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+                        <div class="text-start" style="font-size: 11px; font-weight: bold;">
+                            <span>SDN</span><br>
+                            <span class="text-muted" style="font-size: 9px;">Republic of the Sudan<br>Kawahla Tribe Union</span>
+                        </div>
+                        
+                        <div class="text-center">
+                            <!-- شعار النسر الذهبي المطلوب -->
+                            <img src="{{ url_for('static', filename='uploads/2.png') }}" alt="شعار النسر" width="45" height="45" class="mb-1 object-fit-contain">
+                            <div class="fw-bold" style="font-size: 11px;">جمهورية السودان</div>
+                            <div class="text-muted" style="font-size: 9px;">ديوان شؤون قبيلة الكواهلة</div>
+                        </div>
+
+                        <div class="text-end">
+                            <!-- علم السودان المصغر -->
+                            <div class="border px-1 py-0 bg-white d-inline-block rounded shadow-sm mb-1">
+                                <div style="width: 24px; height: 13px; background: #000; position: relative;">
+                                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 33%; background: red;"></div>
+                                    <div style="position: absolute; top: 33%; left: 0; width: 100%; height: 34%; background: white;"></div>
+                                    <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 33%; background: forestgreen;"></div>
+                                    <div style="position: absolute; top: 0; left: 0; width: 35%; height: 100%; background: #000;"></div>
+                                </div>
+                            </div>
+                            <!-- رقم التسلسل المرتبط بالرقم الوطني أو المعرف -->
+                            <div class="text-danger fw-bold" style="font-size: 10px; font-family: monospace;">{{ user.national_id }}</div>
+                        </div>
+                    </div>
+
+                    <!-- عنوان البطاقة الرسمي -->
+                    <div class="text-center mb-2">
+                        <h5 class="fw-bold text-dark m-0" style="letter-spacing: 1px; font-size: 15px;">
+                            بطاقة إثبات العضوية الشخصية <span class="text-muted" style="font-size: 12px; font-family: Arial;">| ID CARD</span>
+                        </h5>
+                    </div>
+
+                    <!-- محتوى البطاقة (الصورة الشخصية والبيانات الدقيقة من التسجيل) -->
+                    <div class="row align-items-center">
+                        
+                        <!-- القسم الأيسر: الصورة الشخصية وحالة التوثيق -->
+                        <div class="col-4 text-center border-start">
+                            <div class="position-relative d-inline-block">
+                                <img src="{{ url_for('static', filename='uploads/' + user.profile_pic) }}" 
+                                     alt="صورة العضو" 
+                                     class="rounded shadow-sm" 
+                                     style="width: 105px; height: 130px; object-fit: cover; border: 2px solid #b30000;">
+                            </div>
+                            <div class="mt-1">
+                                <span class="badge bg-danger" style="font-size: 9px;">فرع: {{ user.branch }}</span>
+                            </div>
+                            <div class="text-muted mt-1" style="font-size: 7px; border-top: 1px dashed #ccc; pt-1;">سلطة الإصدار والاعتماد</div>
+                        </div>
+
+                        <!-- القسم الأيمن: البيانات مجلوبة مباشرة من حقول التسجيل في قاعدة البيانات -->
+                        <div class="col-8 text-start" style="font-size: 11px;">
+                            <div class="row mb-1">
+                                <div class="col-4 text-muted fw-bold">الإسم:</div>
+                                <div class="col-8 fw-bold text-dark">{{ user.full_name }}</div>
+                            </div>
+                            <div class="row mb-1">
+                                <div class="col-4 text-muted fw-bold">تاريخ الميلاد:</div>
+                                <div class="col-8" style="font-family: monospace;">{{ user.birth_date }}</div>
+                            </div>
+                            <div class="row mb-1">
+                                <div class="col-4 text-muted fw-bold">مكان الميلاد:</div>
+                                <div class="col-8">{{ user.birth_place if user.birth_place else 'السودان - ' + user.branch }}</div>
+                            </div>
+                            <div class="row mb-1">
+                                <div class="col-4 text-muted fw-bold">الرقم الوطني:</div>
+                                <div class="col-8" style="font-family: monospace; font-weight: bold; color: #b30000;">{{ user.national_id }}</div>
+                            </div>
+                            <div class="row mb-1">
+                                <div class="col-4 text-muted fw-bold">الصفة / اللقب:</div>
+                                <div class="col-8 text-primary fw-bold">{{ user.title_type }}</div>
+                            </div>
+                            <div class="row mb-1">
+                                <div class="col-4 text-muted fw-bold">رقم الجوال:</div>
+                                <div class="col-8" style="font-family: monospace;">{{ user.phone }}</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-4 text-muted fw-bold">العنوان:</div>
+                                <div class="col-8 text-truncate">{{ user.residence if user.residence else 'الخرطوم، السودان' }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- التوقيع والختم في الأسفل -->
+                    <div class="row mt-3 pt-2 border-top align-items-center" style="font-size: 9px;">
+                        <div class="col-7 text-start">
+                            <span class="text-muted">لجنة التوثيق والإصدار:</span><br>
+                            <span class="fw-bold text-danger">أمانة ديوان شؤون قبيلة الكواهلة</span>
+                        </div>
+                        <div class="col-5 text-end">
+                            <div class="border border-danger rounded px-2 py-1 d-inline-block text-center bg-white shadow-sm" style="transform: rotate(-3deg); opacity: 0.85;">
+                                <span class="text-danger fw-bold" style="font-size: 8px; display: block;">موثق ومعتمد رسمياً</span>
+                                <span class="text-muted" style="font-size: 6px;">Kawahla Official Seal</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        {% if user.is_verified %}
+            <button onclick="window.print()" class="btn btn-danger mt-4 px-4 py-2 fw-bold shadow"><i class="fas fa-print"></i> طباعة وتحميل البطاقة الرسمية (PDF)</button>
+        {% endif %}
+
+        <!-- قسم الخريطة المباشرة وتحديث العنوان -->
+        <div class="card mt-4 p-4 text-start shadow-sm border-danger">
+            <h4 class="text-danger fw-bold"><i class="fas fa-map-marker-alt"></i> تحديد وتغيير العنوان الجغرافي من الخريطة</h4>
+            <p class="text-muted small">يمكنك في أي وقت تحديث موقعك السكني مباشرة من خريطة الموقع:</p>
+            <div class="bg-light border rounded p-3 text-center mb-3">
+                <span>إحداثيات موقعك الحالي: خط العرض ({{ user.lat }}), خط الطول ({{ user.lng }})</span>
+            </div>
+            <button onclick="updateUserLocation()" class="btn btn-outline-danger fw-bold">تحديث موقعي الحالي جغرافياً الآن</button>
+        </div>
+    </div>
+</div>
+
+<!-- كود CSS المسؤول عن عزل البطاقة وحدها عند طباعتها أو حفظها PDF -->
+<style>
+@media print {
+    /* إخفاء كل محتويات الصفحة والقوائم والأزرار بالكامل */
+    body * {
+        visibility: hidden !important;
+    }
+    /* إظهار البطاقة المحددة وحدها وعناصرها الداخلية */
+    #printable-card, #printable-card * {
+        visibility: visible !important;
+    }
+    /* ضبط موضع البطاقة لتملأ صفحة الـ PDF بنظافة وبدون هوامش مزعجة */
+    #printable-card {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+        border: 2px solid #b30000 !important;
+    }
+}
+</style>
+
+<script>
+function updateUserLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            let lat = position.coords.latitude;
+            let lng = position.coords.longitude;
+            fetch('/update_location', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({lat: lat, lng: lng})
+            }).then(response => response.json()).then(data => {
+                alert(data.message);
+                location.reload();
+            });
+        }, function(error) {
+            alert("تعذر تحديد الموقع الجغرافي تلقائياً.");
+        });
+    } else {
+        alert("متصفحك لا يدعم خاصية تحديد الموقع الجغرافي.");
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="text-center mb-5">
+    <h2 class="text-danger fw-bold"><i class="fas fa-crown"></i> أمراء وقيادات وشخصيات قبيلة الكواهلة المهمة</h2>
+    <p class="text-muted">قسم خاص يوثق رموز القبيلة، أمراء الفروع، الملوك، والمهندسين ورؤساء الروابط.</p>
+</div>
+
+<div class="row">
+    {% for leader in leaders %}
+    <div class="col-md-4 mb-4">
+        <div class="card shadow text-center p-4 border-warning border-3 position-relative">
+            <div class="leader-badge"><i class="fas fa-crown"></i></div>
+            <img src="{{ url_for('static', filename='uploads/' + leader.profile_pic) }}" class="rounded-circle mx-auto mb-3 border border-danger" width="120" height="120" style="object-fit: cover;">
+            <h4 class="fw-bold text-danger">{{ leader.full_name }}</h4>
+            <span class="badge bg-warning text-dark fs-6 mb-2">{{ leader.title_type }}</span>
+            <p class="text-muted small">فرع القبيلة: {{ leader.branch }}</p>
+            <p class="small text-dark"><strong>النسب:</strong> بن {{ leader.father_name }}</p>
+            <p class="small text-muted">السكن: {{ leader.residence }}</p>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center py-5">
+        <h4 class="text-muted">لم يتم تعيين أمراء أو شخصيات قيادية بعد. (يمكن للآدمن تعيينهم وتحديد ألقابهم بكل سهولة من لوحة التحكم الشاملة).</h4>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

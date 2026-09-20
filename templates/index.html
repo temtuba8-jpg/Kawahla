@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- 1. السلايدر المتحرك (يتم التحكم بصوره وعناوينها من لوحة تحكم الآدمن) -->
+{% if sliders %}
+<div id="tribeSlider" class="carousel slide mb-5 shadow-lg rounded-4 overflow-hidden border border-warning" data-bs-ride="carousel">
+    <div class="carousel-indicators">
+        {% for s in sliders %}
+            <button type="button" data-bs-target="#tribeSlider" data-bs-slide-to="{{ loop.index0 }}" {% if loop.first %}class="active"{% endif %}></button>
+        {% endfor %}
+    </div>
+    <div class="carousel-inner" style="max-height: 480px;">
+        {% for s in sliders %}
+        <div class="carousel-item {% if loop.first %}active{% endif %}">
+            <img src="{{ url_for('static', filename='uploads/' + s.image) }}" class="d-block w-100" style="object-fit: cover; height: 480px;" alt="Slider Image">
+            <div class="carousel-caption d-none d-md-block p-4 rounded" style="background: rgba(0, 0, 0, 0.75);">
+                <h3 class="fw-bold text-gold">{{ s.title }}</h3>
+                <p class="fs-5 text-light">{{ s.description }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#tribeSlider" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#tribeSlider" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+    </button>
+</div>
+{% else %}
+<!-- واجهة ترحيبية افتراضية في حال لم يضف الآدمن صور سلايدر بعد -->
+<div class="p-5 mb-5 text-white rounded-4 shadow text-center border border-warning" style="background: linear-gradient(135deg, var(--primary-red), var(--dark-red));">
+    <h1 class="display-5 fw-bold text-gold">مرحباً بكم في بوابة قبيلة الكواهلة</h1>
+    <p class="lead mt-2 text-light">منصة توثيق الأنساب الشاملة لأكثر من مليون نسمة من أبناء القبيلة وفروعها العربية.</p>
+    <div class="mt-4">
+        <a href="{{ url_for('register') }}" class="btn btn-warning text-dark btn-lg px-4 fw-bold me-2 mb-2">سجل الآن ككاهلي</a>
+        <a href="{{ url_for('tree') }}" class="btn btn-outline-light btn-lg px-4 fw-bold mb-2">شجرة الأنساب الذكية</a>
+    </div>
+</div>
+{% endif %}
+
+<!-- 2. قسم الأخبار والفعاليات الديناميكي (يتم نشرها من لوحة الآدمن) -->
+<div class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
+        <h3 class="text-danger fw-bold"><i class="fas fa-newspaper me-2 text-gold"></i> أخبار وفعاليات القبيلة</h3>
+        <span class="badge bg-danger text-light px-3 py-2">محدث دائماً</span>
+    </div>
+
+    <div class="row">
+        {% for n in news %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm border-top border-danger border-4">
+                {% if n.image %}
+                <img src="{{ url_for('static', filename='uploads/' + n.image) }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="News Image">
+                {% endif %}
+                <div class="card-body">
+                    <small class="text-muted"><i class="fas fa-calendar-alt me-1 text-gold"></i> {{ n.date }}</small>
+                    <h5 class="card-title fw-bold text-danger mt-2">{{ n.title }}</h5>
+                    <p class="card-text text-secondary small">{{ n.content }}</p>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center py-4 bg-white rounded shadow-sm border">
+            <p class="text-muted mb-0"><i class="fas fa-info-circle text-gold me-1"></i> لا توجد أخبار منشورة حالياً. (يمكن للآدمن إضافة الأخبار والفعاليات بسهولة من لوحة التحكم).</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- 3. الأقسام الثلاثة الأساسية (أخبار، أمراء، بطاقة رقمية) -->
+<div class="row text-center mt-5">
+    <div class="col-md-4 mb-4">
+        <div class="card p-4 shadow-sm border-top border-danger border-4 h-100">
+            <i class="fas fa-newspaper fa-3x text-danger mb-3"></i>
+            <h3 class="h4 fw-bold text-danger">أخبار القبيلة</h3>
+            <p class="text-muted small">تابع أحدث أخبار وفعاليات أبناء الكواهلة وفروعها في السودان وكل مكان.</p>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card p-4 shadow-sm border-top border-warning border-4 h-100">
+            <i class="fas fa-crown fa-3x text-warning mb-3"></i>
+            <h3 class="h4 fw-bold" style="color: #b89728;">الأمراء والقيادات</h3>
+            <p class="text-muted small">قسم خاص لتوثيق أمراء الفروع والشخصيات الهامة والرموز التاريخية.</p>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card p-4 shadow-sm border-top border-danger border-4 h-100">
+            <i class="fas fa-id-card fa-3x text-danger mb-3"></i>
+            <h3 class="h4 fw-bold text-danger">البطاقة الرقمية</h3>
+            <p class="text-muted small">بطاقة تعريفية رسمية لكل كاهلي موثقة برمز التأكيد وهویة القبيلة.</p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>موقع قبيلة الكواهلة الرسمي - التوثيق والأنساب</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- ايقونة الموقع -->
+    <link rel="icon" href="{{ url_for('static', filename='uploads/logo.png') }}">
+</head>
+<body>
+
+    <!-- الهيدر الاحترافي -->
+    <header class="shadow-lg">
+        <div class="container d-flex justify-content-between align-items-center py-2">
+            <div class="d-flex align-items-center">
+                <!-- الشعار النباض الفخم -->
+                <img src="{{ url_for('static', filename='uploads/logo.png') }}" alt="شعار القبيلة" class="pulse-logo me-3">
+                <div>
+                    <h1 class="navbar-brand mb-0 fw-black">قبيلة الكواهلة الرسمية</h1>
+                    <small class="text-light opacity-88">بوابة التوثيق والأنساب الشاملة (أكثر من مليون نسمة)</small>
+                </div>
+            </div>
+            
+            <nav class="d-none d-lg-flex align-items-center">
+                <a href="{{ url_for('index') }}" class="nav-link"><i class="fas fa-home me-1"></i> الرئيسية</a>
+                <a href="{{ url_for('tree') }}" class="nav-link"><i class="fas fa-sitemap me-1"></i> شجرة الأنساب</a>
+                <a href="{{ url_for('leaders') }}" class="nav-link"><i class="fas fa-crown me-1"></i> الأمراء والقيادات</a>
+                <a href="{{ url_for('forum') }}" class="nav-link"><i class="fas fa-comments me-1"></i> المنتدى</a>
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('profile') }}" class="nav-link text-warning fw-bold"><i class="fas fa-id-card me-1"></i> ملفي الشخصي</a>
+                    {% if current_user.role == 'admin' %}
+                        <a href="{{ url_for('admin_dashboard') }}" class="nav-link btn btn-sm btn-light text-danger fw-bold px-3 ms-2 shadow-sm"><i class="fas fa-user-shield me-1"></i> لوحة الآدمن</a>
+                    {% endif %}
+                    <a href="{{ url_for('logout') }}" class="nav-link text-light opacity-75"><i class="fas fa-sign-out-alt"></i> خروج</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="nav-link"><i class="fas fa-sign-in-alt me-1"></i> دخول</a>
+                    <a href="{{ url_for('register') }}" class="nav-link btn btn-warning text-dark fw-bold px-4 ms-2 shadow-sm"><i class="fas fa-user-plus me-1"></i> سجل كاهلي</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <!-- المحتوى الرئيسي -->
+    <main class="container my-5">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
+                        <i class="fas fa-info-circle me-2"></i> {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- الفوتر الأحمر الملكي المتناسق مع الهوية العربية الأصيلة -->
+    <footer class="footer-section">
+        <div class="container">
+            <div class="row g-4">
+                <!-- عمود التعريف -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="footer-brand-box mb-3">
+                        <img src="{{ url_for('static', filename='uploads/logo.png') }}" alt="شعار القبيلة" class="footer-logo mb-2">
+                        <h4 class="text-gold fw-bold mb-1">قبيلة الكواهلة الرسمية</h4>
+                        <p class="footer-desc small">بوابة توثيق أنساب قبيلة الكواهلة وفروعها العربية (الحسانية، الحسونات، العبابدة، النفيدية، البشاريون) لأكثر من مليون نسمة.</p>
+                    </div>
+                    <div class="footer-quote text-gold fst-italic">
+                        "أنت كاهلي ارفع راسك فوق أنت كاسماء تظلنا..."
+                    </div>
+                </div>
+
+                <!-- عمود الأقسام -->
+                <div class="col-lg-2 col-md-6">
+                    <h5 class="footer-heading">أقسام الموقع</h5>
+                    <ul class="footer-links list-unstyled">
+                        <li><a href="{{ url_for('index') }}"><i class="fas fa-angle-left"></i> الرئيسية</a></li>
+                        <li><a href="{{ url_for('tree') }}"><i class="fas fa-angle-left"></i> شجرة الأنساب</a></li>
+                        <li><a href="{{ url_for('leaders') }}"><i class="fas fa-angle-left"></i> الأمراء والقيادات</a></li>
+                        <li><a href="{{ url_for('forum') }}"><i class="fas fa-angle-left"></i> المنتدى</a></li>
+                    </ul>
+                </div>
+
+                <!-- عمود الخدمات -->
+                <div class="col-lg-3 col-md-6">
+                    <h5 class="footer-heading">الخدمات والتوثيق</h5>
+                    <ul class="footer-links list-unstyled">
+                        <li><a href="{{ url_for('register') }}"><i class="fas fa-angle-left"></i> تسجيل كاهلي جديد</a></li>
+                        <li><a href="{{ url_for('login') }}"><i class="fas fa-angle-left"></i> دخول الأعضاء والآدمن</a></li>
+                        <li><a href="#"><i class="fas fa-angle-left"></i> سياسة الخصوصية وأمان البيانات</a></li>
+                        <li><a href="#"><i class="fas fa-angle-left"></i> شروط ومعايير التوثيق</a></li>
+                    </ul>
+                </div>
+
+                <!-- عمود التواصل -->
+                <div class="col-lg-3 col-md-6">
+                    <h5 class="footer-heading">طريقة الاتصال</h5>
+                    <div class="footer-contact-info">
+                        <p class="small footer-text mb-2"><i class="fas fa-envelope text-gold me-2"></i> info@kawahla-tribe.org</p>
+                        <p class="small footer-text mb-3"><i class="fas fa-map-marker-alt text-gold me-2"></i> السودان - الخرطوم وفروع العالم</p>
+                        <div class="social-icons d-flex gap-2">
+                            <a href="#" class="social-btn"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" class="social-btn"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="social-btn"><i class="fab fa-whatsapp"></i></a>
+                            <a href="#" class="social-btn"><i class="fab fa-youtube"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="footer-divider my-4">
+
+            <div class="text-center">
+                <p class="footer-text small mb-0">جميع الحقوق محفوظة لقارة قبيلة الكواهلة الرقمية © 2026</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
