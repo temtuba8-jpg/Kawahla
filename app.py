@@ -19,7 +19,7 @@ app.config["SECRET_KEY"] = "kawahla_secret_key_2026_super_secure"
 
 # إعداد اتصال MongoDB السحابي
 app.config["MONGO_URI"] = (
-    "mongodb+srv://hzoooof11_db_user:YOUR_DB_PASSWORD@cluster0.outspyb.mongodb.net/kawahla_db?retryWrites=true&w=majority&appName=Cluster0&tls=true&tlsAllowInvalidCertificates=true"
+    "mongodb+srv://hzoooof11_db_user:Fad%400911923356@cluster0.outspyb.mongodb.net/kawahla_db?retryWrites=true&w=majority&appName=Cluster0&tls=true&tlsAllowInvalidCertificates=true"
 )
 
 
