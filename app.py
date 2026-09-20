@@ -22,7 +22,7 @@ app.config["MONGO_URI"] = (
     "mongodb+srv://kawahla:Fad%400911923356@cluster0.outspyb.mongodb.net/kawahla_db?retryWrites=true&w=majority&appName=Cluster0&tls=true&tlsAllowInvalidCertificates=true"
 )
 
-# مفتاح ImgBB المباشر لرفع الصور والملفات (يفصل الصور عن السيرفر لتوافق Render)
+# مفتاح ImgBB المباشر لرفع الصور والملفات
 IMGBB_API_KEY = "85c7ff6f1e72c472683b7ac998a05e38"
 
 mongo = PyMongo(app)
@@ -31,7 +31,6 @@ login_manager.init_app(app)
 login_manager.login_view = "login"
 
 
-# --- دالة رفع الصور إلى ImgBB ---
 def upload_to_imgbb(file_storage):
     if not file_storage or file_storage.filename == "":
         return None
@@ -40,18 +39,15 @@ def upload_to_imgbb(file_storage):
         url = "https://api.imgbb.com/1/upload"
         payload = {"key": IMGBB_API_KEY}
         files = {"image": (file_storage.filename, file_bytes)}
-
         response = requests.post(url, data=payload, files=files)
         result = response.json()
-
         if result.get("success"):
-            return result["data"]["url"]  # إرجاع رابط الصورة المباشر من ImgBB
+            return result["data"]["url"]
     except Exception as e:
         print(f"Error uploading to ImgBB: {e}")
     return None
 
 
-# --- نموذج المستخدم المتوافق مع Flask-Login و MongoDB ---
 class User(UserMixin):
 
     def __init__(self, user_data):
@@ -70,7 +66,6 @@ class User(UserMixin):
             self.residence = user_data.get("residence", "")
             self.lat = user_data.get("lat", 15.5007)
             self.lng = user_data.get("lng", 32.5599)
-            # صورة افتراضية في حال عدم وجود صورة شخصية
             self.profile_pic = user_data.get("profile_pic", "https://i.ibb.co/default.png")
             self.document_pic = user_data.get("document_pic", "")
             self.is_verified = user_data.get("is_verified", False)
@@ -94,7 +89,6 @@ def load_user(user_id):
     return None
 
 
-# --- المسارات (Routes) ---
 @app.route("/")
 def index():
     news_list = list(mongo.db.news.find())
@@ -195,6 +189,7 @@ def add_comment(topic_id):
 def register():
     if request.method == "POST":
         username = request.form["username"]
+        # للمستخدمين العاديين، نبقي كلمة المرور مشفرة بأمان
         password = generate_password_hash(request.form["password"])
         full_name = request.form["full_name"]
         birth_date = request.form["birth_date"]
@@ -206,14 +201,12 @@ def register():
         grandfather_name = request.form.get("grandfather_name", "")
         residence = request.form.get("residence", "")
 
-        # رفع الصورة الشخصية إلى ImgBB
         profile_pic_file = request.files.get("profile_pic")
         profile_url = "https://i.ibb.co/default.png"
         uploaded_profile = upload_to_imgbb(profile_pic_file)
         if uploaded_profile:
             profile_url = uploaded_profile
 
-        # رفع صورة المستند إلى ImgBB
         doc_file = request.files.get("document_pic")
         doc_url = ""
         uploaded_doc = upload_to_imgbb(doc_file)
@@ -256,15 +249,26 @@ def login():
         username = request.form["username"]
         password = request.form["password"]
         user_data = mongo.db.users.find_one({"username": username})
-        if user_data and check_password_hash(user_data["password"], password):
-            user_obj = User(user_data)
-            login_user(user_obj)
-            if user_obj.role == "admin":
-                return redirect(url_for("admin_dashboard"))
-            elif user_obj.role == "moderator":
-                return redirect(url_for("moderator_dashboard"))
+
+        if user_data:
+            # التحقق الخاص لحساب الأدمن أو التحقق الآمن العادي
+            if username == "admin":
+                is_valid = password == "admin123" or check_password_hash(
+                    user_data["password"], password
+                )
             else:
-                return redirect(url_for("profile"))
+                is_valid = check_password_hash(user_data["password"], password)
+
+            if is_valid:
+                user_obj = User(user_data)
+                login_user(user_obj)
+                if user_obj.role == "admin":
+                    return redirect(url_for("admin_dashboard"))
+                elif user_obj.role == "moderator":
+                    return redirect(url_for("moderator_dashboard"))
+                else:
+                    return redirect(url_for("profile"))
+
         flash("اسم المستخدم أو كلمة المرور غير صحيحة", "danger")
     return render_template("login.html")
 
@@ -480,12 +484,12 @@ def logout():
 
 if __name__ == "__main__":
     with app.app_context():
-        # التأكد من عدم وجود حساب آدمن مسبقاً، أو تحديثه لضمان المطابقة
+        # فرض إنشاء أو تحديث حساب الأدمن لضمان التوافق التام
         admin_data = mongo.db.users.find_one({"username": "admin"})
         if not admin_data:
             admin_user = {
                 "username": "admin",
-                "password": generate_password_hash("admin123"),
+                "password": "admin123",  # كلمة المرور المباشرة للأدمن لضمان الدخول
                 "full_name": "الآدمن العام للقبيلة",
                 "birth_date": "1980-01-01",
                 "age": 46,
@@ -500,12 +504,11 @@ if __name__ == "__main__":
             }
             mongo.db.users.insert_one(admin_user)
         else:
-            # تحديث كلمة المرور وصلاحيات الأدمن تلقائياً لضمان الدخول السليم دائمًا
             mongo.db.users.update_one(
                 {"username": "admin"},
                 {
                     "$set": {
-                        "password": generate_password_hash("admin123"),
+                        "password": "admin123",
                         "role": "admin",
                         "is_verified": True,
                         "is_leader": True,
@@ -513,6 +516,5 @@ if __name__ == "__main__":
                 },
             )
 
-    # دعم المنفذ التلقائي للاستضافة (Render)
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
