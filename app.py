@@ -19,8 +19,10 @@ app.config["SECRET_KEY"] = "kawahla_secret_key_2026_super_secure"
 
 # إعداد اتصال MongoDB السحابي
 app.config["MONGO_URI"] = (
-    "mongodb+srv://hzoooof11_db_user:YOUR_DB_PASSWORD@cluster0.outspyb.mongodb.net/kawahla_db?retryWrites=true&w=majority&appName=Cluster0&tlsAllowInvalidCertificates=true"
+    "mongodb+srv://hzoooof11_db_user:YOUR_DB_PASSWORD@cluster0.outspyb.mongodb.net/kawahla_db?retryWrites=true&w=majority&appName=Cluster0&tls=true&tlsAllowInvalidCertificates=true"
 )
+
+
 # مفتاح ImgBB المباشر لرفع الصور والملفات (يفصل الصور عن السيرفر لتوافق Render)
 IMGBB_API_KEY = "85c7ff6f1e72c472683b7ac998a05e38"
 
