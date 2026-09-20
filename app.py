@@ -480,7 +480,9 @@ def logout():
 
 if __name__ == "__main__":
     with app.app_context():
-        if not mongo.db.users.find_one({"username": "admin"}):
+        # التأكد من عدم وجود حساب آدمن مسبقاً، أو تحديثه لضمان المطابقة
+        admin_data = mongo.db.users.find_one({"username": "admin"})
+        if not admin_data:
             admin_user = {
                 "username": "admin",
                 "password": generate_password_hash("admin123"),
@@ -497,6 +499,19 @@ if __name__ == "__main__":
                 "profile_pic": "https://i.ibb.co/default.png",
             }
             mongo.db.users.insert_one(admin_user)
+        else:
+            # تحديث كلمة المرور وصلاحيات الأدمن تلقائياً لضمان الدخول السليم دائمًا
+            mongo.db.users.update_one(
+                {"username": "admin"},
+                {
+                    "$set": {
+                        "password": generate_password_hash("admin123"),
+                        "role": "admin",
+                        "is_verified": True,
+                        "is_leader": True,
+                    }
+                },
+            )
 
     # دعم المنفذ التلقائي للاستضافة (Render)
     port = int(os.environ.get("PORT", 5000))
