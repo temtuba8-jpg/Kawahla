@@ -1,11 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap');
 
 :root {
-    --primary-red: #C90016;       /* أحمر الحدث الناري الجاذب والقوي */
-    --dark-red: #8B0000;          /* أحمر داكن للعمق والخلفيات */
-    --gold-color: #E5C158;        /* ذهبي مضيء وفخم */
-    --light-gold: #FDF6E2;        /* ذهبي فاتح للخلفيات */
-    --dark-bg: #121212;           /* أسود فاحم احترافي */
+    --primary-red: #C90016;        /* أحمر الحدث الناري الجاذب والقوي */
+    --dark-red: #8B0000;           /* أحمر داكن للعمق والخلفيات */
+    --gold-color: #E5C158;         /* ذهبي مضيء وفخم */
+    --light-gold: #FDF6E2;         /* ذهبي فاتح للخلفيات */
+    --dark-bg: #121212;            /* أسود فاحم احترافي */
     --white: #ffffff;
 }
 
@@ -70,6 +70,18 @@ nav a {
 
 nav a:hover {
     color: var(--gold-color) !important;
+}
+
+/* تنسيق قائمة الجوال المنسدلة */
+@media (max-width: 991.98px) {
+    .navbar-collapse {
+        background: rgba(139, 0, 0, 0.95);
+        padding: 15px;
+        border-radius: 12px;
+        margin-top: 15px;
+        border: 1px solid var(--gold-color);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
 }
 
 /* Cards with Luxury Shadows */
@@ -185,8 +197,8 @@ nav a:hover {
 
 /* Professional Royal Red Footer Styling (Arab Tribe Identity) */
 .footer-section {
-    background: linear-gradient(135deg, #500000 0%, #2b0000 100%) !important; /* أحمر داكن ملكي فاخر متناسق مع هيبة القبيلة */
-    color: #ffffff !important;      /* لون أبيض ناصع وواضح تماماً */
+    background: linear-gradient(135deg, #500000 0%, #2b0000 100%) !important;
+    color: #ffffff !important;
     border-top: 4px solid var(--gold-color);
     padding: 60px 0 25px 0;
     margin-top: 70px;
@@ -220,7 +232,7 @@ nav a:hover {
 }
 
 .footer-desc, .footer-text {
-    color: #fceea7 !important; /* ذهبي فاتح ناصع وواضح جداً على الخلفية الحمراء الملكية */
+    color: #fceea7 !important;
 }
 
 .footer-links li {
@@ -228,7 +240,7 @@ nav a:hover {
 }
 
 .footer-links a {
-    color: #ffffff !important; /* أبيض ناصع للقراءة المريحة */
+    color: #ffffff !important;
     text-decoration: none;
     font-size: 0.92rem;
     transition: all 0.3s ease;
