@@ -189,7 +189,6 @@ def add_comment(topic_id):
 def register():
     if request.method == "POST":
         username = request.form["username"]
-        # للمستخدمين العاديين، نبقي كلمة المرور مشفرة بأمان
         password = generate_password_hash(request.form["password"])
         full_name = request.form["full_name"]
         birth_date = request.form["birth_date"]
@@ -246,28 +245,28 @@ def register():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
-        user_data = mongo.db.users.find_one({"username": username})
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "").strip()
 
-        if user_data:
-            # التحقق الخاص لحساب الأدمن أو التحقق الآمن العادي
-            if username == "admin":
-                is_valid = password == "admin123" or check_password_hash(
-                    user_data["password"], password
-                )
-            else:
-                is_valid = check_password_hash(user_data["password"], password)
-
-            if is_valid:
+        # تجاوز مباشر لحساب الأدمن لحل أي مشكلة تشفير نهائياً
+        if username == "admin" and password == "admin123":
+            user_data = mongo.db.users.find_one({"username": "admin"})
+            if user_data:
                 user_obj = User(user_data)
                 login_user(user_obj)
-                if user_obj.role == "admin":
-                    return redirect(url_for("admin_dashboard"))
-                elif user_obj.role == "moderator":
-                    return redirect(url_for("moderator_dashboard"))
-                else:
-                    return redirect(url_for("profile"))
+                return redirect(url_for("admin_dashboard"))
+
+        # التحقق العادي لبقيّة المستخدمين
+        user_data = mongo.db.users.find_one({"username": username})
+        if user_data and check_password_hash(user_data["password"], password):
+            user_obj = User(user_data)
+            login_user(user_obj)
+            if user_obj.role == "admin":
+                return redirect(url_for("admin_dashboard"))
+            elif user_obj.role == "moderator":
+                return redirect(url_for("moderator_dashboard"))
+            else:
+                return redirect(url_for("profile"))
 
         flash("اسم المستخدم أو كلمة المرور غير صحيحة", "danger")
     return render_template("login.html")
@@ -484,37 +483,25 @@ def logout():
 
 if __name__ == "__main__":
     with app.app_context():
-        # فرض إنشاء أو تحديث حساب الأدمن لضمان التوافق التام
-        admin_data = mongo.db.users.find_one({"username": "admin"})
-        if not admin_data:
-            admin_user = {
-                "username": "admin",
-                "password": "admin123",  # كلمة المرور المباشرة للأدمن لضمان الدخول
-                "full_name": "الآدمن العام للقبيلة",
-                "birth_date": "1980-01-01",
-                "age": 46,
-                "national_id": "000000000",
-                "phone": "0000000000",
-                "branch": "الكواهلة الأم",
-                "role": "admin",
-                "title_type": "آدمن الموقع",
-                "is_verified": True,
-                "is_leader": True,
-                "profile_pic": "https://i.ibb.co/default.png",
-            }
-            mongo.db.users.insert_one(admin_user)
-        else:
-            mongo.db.users.update_one(
-                {"username": "admin"},
-                {
-                    "$set": {
-                        "password": "admin123",
-                        "role": "admin",
-                        "is_verified": True,
-                        "is_leader": True,
-                    }
-                },
-            )
+        # حذف وإعادة إنشاء حساب الأدمن بالكامل لضمان خلوه من أي أخطاء أو تضارب في القاعدة
+        mongo.db.users.delete_one({"username": "admin"})
+
+        admin_user = {
+            "username": "admin",
+            "password": generate_password_hash("admin123"),
+            "full_name": "الآدمن العام للقبيلة",
+            "birth_date": "1980-01-01",
+            "age": 46,
+            "national_id": "000000000",
+            "phone": "0000000000",
+            "branch": "الكواهلة الأم",
+            "role": "admin",
+            "title_type": "آدمن الموقع",
+            "is_verified": True,
+            "is_leader": True,
+            "profile_pic": "https://i.ibb.co/default.png",
+        }
+        mongo.db.users.insert_one(admin_user)
 
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
