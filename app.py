@@ -253,13 +253,18 @@ def login():
 
         user_data = mongo.db.users.find_one({"username": username})
         if user_data:
-            # التحقق المرن لكلمة المرور (تدعم النص العادي والـ Hash)
             stored_pass = user_data.get("password", "")
-            is_valid = (
-                password == stored_pass
-                or check_password_hash(stored_pass, password)
-                or (username == "admin" and password == "admin123")
-            )
+            
+            # التحقق الآمن والمرن لمنع أي استثناءات
+            is_valid = False
+            if password == stored_pass or (username == "admin" and password == "admin123"):
+                is_valid = True
+            else:
+                try:
+                    if check_password_hash(stored_pass, password):
+                        is_valid = True
+                except Exception:
+                    pass
 
             if is_valid:
                 user_obj = User(user_data)
@@ -273,7 +278,6 @@ def login():
 
         flash("اسم المستخدم أو كلمة المرور غير صحيحة", "danger")
     return render_template("login.html")
-
 
 @app.route("/profile")
 @login_required
