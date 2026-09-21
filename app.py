@@ -64,10 +64,10 @@ class User(UserMixin):
     def __init__(self, user_data):
         if user_data:
             self.id = str(user_data.get("_id"))
-            self.username = user_data.get("username")
-            self.password = user_data.get("password")
-            self.full_name = user_data.get("full_name")
-            self.birth_date = user_data.get("birth_date")
+            self.username = user_data.get("username", "")
+            self.password = user_data.get("password", "")
+            self.full_name = user_data.get("full_name", "مستخدم")
+            self.birth_date = user_data.get("birth_date", "2000-01-01")
             self.age = user_data.get("age", 25)
             self.national_id = user_data.get("national_id", "")
             self.phone = user_data.get("phone", "")
@@ -81,7 +81,7 @@ class User(UserMixin):
                 "profile_pic", "https://i.ibb.co/default.png"
             )
             self.document_pic = user_data.get("document_pic", "")
-            self.is_verified = user_data.get("is_verified", True)
+            self.is_verified = user_data.get("is_verified", False)
             self.role = user_data.get("role", "user")
             self.title_type = user_data.get("title_type", "عضو")
             self.is_leader = user_data.get("is_leader", False)
@@ -267,7 +267,6 @@ def login():
         national_id = request.form.get("national_id", "").strip()
         password = request.form.get("password", "").strip()
 
-        # الاستعلام باستخدام الرقم الوطني، مع دعم حساب الآدمن عبر اسم المستخدم أو الرقم الوطني الافتراضي
         user_data = None
         if national_id == "admin" or national_id == "000000000":
             user_data = mongo.db.users.find_one({"username": "admin"})
@@ -343,9 +342,8 @@ def profile():
 @login_required
 def update_profile_pic():
     user_doc = mongo.db.users.find_one({"_id": ObjectId(current_user.id)})
-    last_update = user_doc.get("last_profile_pic_update")
+    last_update = user_doc.get("last_profile_pic_update") if user_doc else None
 
-    # التحقق من مرور شهر (30 يوماً) على آخر تحديث للصورة الشخصية
     if last_update:
         if datetime.utcnow() - last_update < timedelta(days=30):
             flash(
@@ -354,7 +352,6 @@ def update_profile_pic():
             )
             return redirect(url_for("profile"))
 
-    # استقبال الصورة إما كملف محمل من الجهاز أو كبيانات Base64 من الكاميرا
     profile_pic_file = request.files.get("profile_pic")
     profile_pic_base64 = request.form.get("profile_pic_base64")
 
