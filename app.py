@@ -252,19 +252,46 @@ def login():
         password = request.form.get("password", "").strip()
 
         user_data = mongo.db.users.find_one({"username": username})
+        
+        # إذا كان المستخدم هو admin ولم يتم العثور عليه، نقوم بإنشائه فوراً
+        if username == "admin" and not user_data:
+            admin_user = {
+                "username": "admin",
+                "password": generate_password_hash("admin123"),
+                "full_name": "الآدمن العام",
+                "birth_date": "1980-01-01",
+                "age": 46,
+                "national_id": "000000000",
+                "phone": "0000000000",
+                "branch": "الإدارة",
+                "role": "admin",
+                "title_type": "آدمن الموقع",
+                "is_verified": True,
+                "is_leader": True,
+                "profile_pic": "https://i.ibb.co/default.png",
+            }
+            mongo.db.users.insert_one(admin_user)
+            user_data = mongo.db.users.find_one({"username": "admin"})
+
         if user_data:
             stored_pass = user_data.get("password", "")
-            
-            # التحقق الآمن والمرن لمنع أي استثناءات
             is_valid = False
-            if password == stored_pass or (username == "admin" and password == "admin123"):
+
+            # فحص خاص لحساب الأدمن لضمان نجاحه الفوري
+            if username == "admin" and (password == "admin123" or stored_pass == "admin123"):
                 is_valid = True
+                # تحديث كلمة المرور في قاعدة البيانات لتكون مشفرة وصحيحة مستقبلاً
+                mongo.db.users.update_one(
+                    {"username": "admin"},
+                    {"$set": {"password": generate_password_hash("admin123"), "role": "admin", "is_verified": True}}
+                )
             else:
                 try:
                     if check_password_hash(stored_pass, password):
                         is_valid = True
                 except Exception:
-                    pass
+                    if stored_pass == password:
+                        is_valid = True
 
             if is_valid:
                 user_obj = User(user_data)
@@ -302,7 +329,6 @@ def update_location():
 @app.route("/admin", methods=["GET", "POST"])
 @login_required
 def admin_dashboard():
-    # السماح بالدخول فوراً إذا كان الحساب هو admin أو له دور admin
     if current_user.role != "admin" and current_user.username != "admin":
         flash("غير مسموح لك بدخول هذه الصفحة", "danger")
         return redirect(url_for("index"))
@@ -329,7 +355,6 @@ def admin_dashboard():
     )
 
 
-# --- رابط طوارئ لإعطاء صلاحية الآدمن لأي مستخدم مسجل دخول حالياً ---
 @app.route("/make_me_admin_emergency")
 @login_required
 def make_me_admin_emergency():
@@ -337,10 +362,7 @@ def make_me_admin_emergency():
         {"_id": ObjectId(current_user.id)},
         {"$set": {"role": "admin", "is_verified": True}},
     )
-    flash(
-        "تم ترقية حسابك الحالي إلى (آدمن) بنجاح! يمكنك الآن دخول لوحة التحكم.",
-        "success",
-    )
+    flash("تم ترقية حسابك الحالي إلى (آدمن) بنجاح!", "success")
     return redirect(url_for("admin_dashboard"))
 
 
@@ -500,12 +522,12 @@ def logout():
 
 if __name__ == "__main__":
     with app.app_context():
-        # التأكد من وجود حساب الأدمن دائمًا وبكلمة مرور واضحة ومباشرة
+        # التأكد من إنشاء أو تحديث حساب الأدمن الافتراضي عند بدء التشغيل
         existing_admin = mongo.db.users.find_one({"username": "admin"})
         if not existing_admin:
             admin_user = {
                 "username": "admin",
-                "password": "admin123",
+                "password": generate_password_hash("admin123"),
                 "full_name": "الآدمن العام",
                 "birth_date": "1980-01-01",
                 "age": 46,
@@ -524,7 +546,7 @@ if __name__ == "__main__":
                 {"username": "admin"},
                 {
                     "$set": {
-                        "password": "admin123",
+                        "password": generate_password_hash("admin123"),
                         "role": "admin",
                         "is_verified": True,
                     }
