@@ -1,13 +1,19 @@
+```html
 {% extends "base.html" %}
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-10">
         
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="text-danger fw-bold"><i class="fas fa-comments"></i> منتدى قبيلة الكواهلة</h2>
+            <h2 class="text-danger fw-bold">
+                <i class="fas fa-comments"></i> منتدى قبيلة الكواهلة
+            </h2>
+
             {% if current_user.is_authenticated and current_user.is_admin %}
                 <!-- زر لإضافة منشور جديد إذا كان المستخدم أدمن -->
-                <button class="btn btn-danger fw-bold" data-bs-toggle="modal" data-bs-target="#newTopicModal">
+                <button class="btn btn-danger fw-bold"
+                        data-bs-toggle="modal"
+                        data-bs-target="#newTopicModal">
                     <i class="fas fa-plus-circle"></i> إضافة موضوع جديد
                 </button>
             {% endif %}
@@ -15,86 +21,217 @@
 
         <!-- عرض المواضيع -->
         {% if topics %}
+
             {% for topic in topics %}
+
                 <div class="card shadow-sm border-danger mb-4 rounded-4">
+
                     <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
-                        <h5 class="m-0 fw-bold"><i class="fas fa-bullhorn"></i> {{ topic.title }}</h5>
-                        <small style="font-size: 11px;">بواسطة: {{ topic.author.full_name if topic.author else 'الإدارة' }}</small>
+                        <h5 class="m-0 fw-bold">
+                            <i class="fas fa-bullhorn"></i> {{ topic.title }}
+                        </h5>
+
+                        <small style="font-size: 11px;">
+                            بواسطة:
+                            {{ topic.author.full_name if topic.author else 'الإدارة' }}
+                        </small>
                     </div>
+
                     <div class="card-body bg-light">
-                        <p class="card-text fs-6" style="white-space: pre-line;">{{ topic.content }}</p>
+
+                        <!-- محتوى الموضوع -->
+                        <p class="card-text fs-6" style="white-space: pre-line;">
+                            {{ topic.content }}
+                        </p>
+
                         <hr>
-                        
+
                         <!-- قسم التعليقات -->
-                        <h6 class="text-danger fw-bold mb-3"><i class="fas fa-comment-dots"></i> التعليقات ({{ topic.comments|length }})</h6>
-                        
-                        <div class="comments-section mb-3" style="max-height: 250px; overflow-y: auto;">
+                        <h6 class="text-danger fw-bold mb-3">
+                            <i class="fas fa-comment-dots"></i>
+                            التعليقات ({{ topic.comments|length }})
+                        </h6>
+
+                        <div class="comments-section mb-3"
+                             style="max-height: 250px; overflow-y: auto;">
+
                             {% if topic.comments %}
+
                                 {% for comment in topic.comments %}
+
                                     <div class="p-2 mb-2 bg-white border rounded shadow-sm text-start">
+
                                         <div class="d-flex justify-content-between">
-                                            <span class="fw-bold text-dark" style="font-size: 12px;">{{ comment.author.full_name if comment.author else 'عضو الكاهلي' }}</span>
-                                            <small class="text-muted" style="font-size: 10px;">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') if comment.created_at else '' }}</small>
+
+                                            <span class="fw-bold text-dark"
+                                                  style="font-size: 12px;">
+                                                {{ comment.author.full_name if comment.author else 'عضو الكاهلي' }}
+                                            </span>
+
+                                            <small class="text-muted"
+                                                   style="font-size: 10px;">
+                                                {{ comment.created_at.strftime('%Y-%m-%d %H:%M')
+                                                   if comment.created_at else '' }}
+                                            </small>
+
                                         </div>
-                                        <p class="m-0 text-secondary mt-1" style="font-size: 13px;">{{ comment.content }}</p>
+
+                                        <p class="m-0 text-secondary mt-1"
+                                           style="font-size: 13px;">
+                                            {{ comment.content }}
+                                        </p>
+
                                     </div>
+
                                 {% endfor %}
+
                             {% else %}
-                                <p class="text-muted small">لا توجد تعليقات بعد. كن أول من يعلق!</p>
+
+                                <p class="text-muted small">
+                                    لا توجد تعليقات بعد. كن أول من يعلق!
+                                </p>
+
                             {% endif %}
+
                         </div>
 
                         <!-- نموذج إضافة تعليق للمستخدم -->
                         {% if current_user.is_authenticated %}
-                            <form action="{{ url_for('add_comment', topic_id=topic.id) }}" method="POST" class="mt-2">
+
+                            <form action="{{ url_for('add_comment', topic_id=topic['_id']) }}"
+                                  method="POST"
+                                  class="mt-2">
+
                                 <div class="input-group">
-                                    <input type="text" name="content" class="form-control" placeholder="اكتب تعليقك هنا..." required>
-                                    <button class="btn btn-danger" type="submit"><i class="fas fa-paper-plane"></i> تعليق</button>
+
+                                    <input type="text"
+                                           name="content"
+                                           class="form-control"
+                                           placeholder="اكتب تعليقك هنا..."
+                                           required>
+
+                                    <button class="btn btn-danger"
+                                            type="submit">
+                                        <i class="fas fa-paper-plane"></i>
+                                        تعليق
+                                    </button>
+
                                 </div>
+
                             </form>
+
                         {% else %}
-                            <p class="text-center small text-muted"><a href="{{ url_for('login') }}">تسجيل الدخول</a> مطلوب لتتمكن من إضافة تعليق.</p>
+
+                            <p class="text-center small text-muted">
+                                <a href="{{ url_for('login') }}">
+                                    تسجيل الدخول
+                                </a>
+                                مطلوب لتتمكن من إضافة تعليق.
+                            </p>
+
                         {% endif %}
 
                     </div>
                 </div>
+
             {% endfor %}
+
         {% else %}
+
             <div class="alert alert-warning text-center fw-bold">
-                لا توجد مواضيع منشورة في المنتدى حالياً. ترقبونا قريباً!
+                لا توجد مواضيع منشورة في المنتدى حالياً.
+                ترقبونا قريباً!
             </div>
+
         {% endif %}
 
     </div>
 </div>
 
+
 <!-- Modal إضافة موضوع جديد (خاص بالأدمن) -->
 {% if current_user.is_authenticated and current_user.is_admin %}
-<div class="modal fade" id="newTopicModal" tabindex="-1" aria-hidden="true">
+
+<div class="modal fade"
+     id="newTopicModal"
+     tabindex="-1"
+     aria-hidden="true">
+
     <div class="modal-dialog">
+
         <div class="modal-content">
-            <form action="{{ url_for('create_topic') }}" method="POST">
+
+            <form action="{{ url_for('create_topic') }}"
+                  method="POST">
+
                 <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title">إنشاء موضوع جديد بالمنتدى</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+                    <h5 class="modal-title">
+                        إنشاء موضوع جديد بالمنتدى
+                    </h5>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close">
+                    </button>
+
                 </div>
+
                 <div class="modal-content p-3 border-0">
+
                     <div class="mb-3 text-start">
-                        <label class="form-label fw-bold">عنوان الموضوع</label>
-                        <input type="text" name="title" class="form-control" required>
+
+                        <label class="form-label fw-bold">
+                            عنوان الموضوع
+                        </label>
+
+                        <input type="text"
+                               name="title"
+                               class="form-control"
+                               required>
+
                     </div>
+
                     <div class="mb-3 text-start">
-                        <label class="form-label fw-bold">محتوى المنشور</label>
-                        <textarea name="content" rows="4" class="form-control" required></textarea>
+
+                        <label class="form-label fw-bold">
+                            محتوى المنشور
+                        </label>
+
+                        <textarea name="content"
+                                  rows="4"
+                                  class="form-control"
+                                  required></textarea>
+
                     </div>
+
                 </div>
+
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
-                    <button type="submit" class="btn btn-danger">نشر الموضوع</button>
+
+                    <button type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        إغلاق
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-danger">
+                        نشر الموضوع
+                    </button>
+
                 </div>
+
             </form>
+
         </div>
+
     </div>
+
 </div>
+
 {% endif %}
+
 {% endblock %}
+```
