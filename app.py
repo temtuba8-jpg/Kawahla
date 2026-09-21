@@ -68,26 +68,30 @@ class User(UserMixin):
             self.password = user_data.get("password", "")
             self.full_name = user_data.get("full_name", "مستخدم")
             self.birth_date = user_data.get("birth_date", "2000-01-01")
+            self.birth_place = user_data.get("birth_place", "السودان")
             self.age = user_data.get("age", 25)
             self.national_id = user_data.get("national_id", "")
             self.phone = user_data.get("phone", "")
             self.branch = user_data.get("branch", "عام")
             self.father_name = user_data.get("father_name", "")
             self.grandfather_name = user_data.get("grandfather_name", "")
-            self.residence = user_data.get("residence", "")
+            self.residence = user_data.get("residence", "الخرطوم، السودان")
             self.lat = user_data.get("lat", 15.5007)
             self.lng = user_data.get("lng", 32.5599)
-            self.profile_pic = user_data.get(
-                "profile_pic", "https://i.ibb.co/default.png"
-            )
+            
+            # معالجة رابط الصورة الشخصية ليتطابق مع القالب (إذا كان رابطاً كاملاً أو اسم ملف فقط)
+            raw_pic = user_data.get("profile_pic", "default.png")
+            if raw_pic.startswith("http"):
+                self.profile_pic = raw_pic
+            else:
+                self.profile_pic = raw_pic if raw_pic else "default.png"
+                
             self.document_pic = user_data.get("document_pic", "")
             self.is_verified = user_data.get("is_verified", False)
             self.role = user_data.get("role", "user")
             self.title_type = user_data.get("title_type", "عضو")
             self.is_leader = user_data.get("is_leader", False)
-            self.last_profile_pic_update = user_data.get(
-                "last_profile_pic_update"
-            )
+            self.last_profile_pic_update = user_data.get("last_profile_pic_update")
 
     @property
     def is_admin(self):
@@ -210,16 +214,18 @@ def register():
         password = generate_password_hash(request.form["password"])
         full_name = request.form["full_name"]
         birth_date = request.form["birth_date"]
-        age = int(request.form["age"])
+        birth_place = request.form.get("birth_place", "السودان")
+        age = int(request.form.get("age", 25))
         national_id = request.form["national_id"]
         phone = request.form.get("phone", "")
         branch = request.form["branch"]
         father_name = request.form.get("father_name", "")
         grandfather_name = request.form.get("grandfather_name", "")
         residence = request.form.get("residence", "")
+        title_type = request.form.get("title_type", "عضو")
 
         profile_pic_file = request.files.get("profile_pic")
-        profile_url = "https://i.ibb.co/default.png"
+        profile_url = "default.png"
         uploaded_profile = upload_to_imgbb(profile_pic_file)
         if uploaded_profile:
             profile_url = uploaded_profile
@@ -235,6 +241,7 @@ def register():
             "password": password,
             "full_name": full_name,
             "birth_date": birth_date,
+            "birth_place": birth_place,
             "age": age,
             "national_id": national_id,
             "phone": phone,
@@ -248,7 +255,7 @@ def register():
             "document_pic": doc_url,
             "is_verified": False,
             "role": "user",
-            "title_type": "عضو",
+            "title_type": title_type,
             "is_leader": False,
             "last_profile_pic_update": None,
         }
@@ -276,6 +283,7 @@ def login():
                     "password": generate_password_hash("admin123"),
                     "full_name": "الآدمن العام",
                     "birth_date": "1980-01-01",
+                    "birth_place": "الخرطوم",
                     "age": 46,
                     "national_id": "000000000",
                     "phone": "0000000000",
@@ -284,7 +292,7 @@ def login():
                     "title_type": "آدمن الموقع",
                     "is_verified": True,
                     "is_leader": True,
-                    "profile_pic": "https://i.ibb.co/default.png",
+                    "profile_pic": "default.png",
                 }
                 mongo.db.users.insert_one(admin_user)
                 user_data = mongo.db.users.find_one({"username": "admin"})
@@ -338,9 +346,10 @@ def profile():
     return render_template("profile.html", user=current_user)
 
 
-@app.route("/update_profile_pic", methods=["POST"])
+# تم تعديل مسار استقبال الصورة ليتطابق تماماً مع اسم الحقل في قالب البروفايل (new_profile_pic)
+@app.route("/update_profile_picture", methods=["POST"])
 @login_required
-def update_profile_pic():
+def update_profile_picture():
     user_doc = mongo.db.users.find_one({"_id": ObjectId(current_user.id)})
     last_update = user_doc.get("last_profile_pic_update") if user_doc else None
 
@@ -352,7 +361,7 @@ def update_profile_pic():
             )
             return redirect(url_for("profile"))
 
-    profile_pic_file = request.files.get("profile_pic")
+    profile_pic_file = request.files.get("new_profile_pic")
     profile_pic_base64 = request.form.get("profile_pic_base64")
 
     image_input = profile_pic_file if profile_pic_file else profile_pic_base64
@@ -368,7 +377,7 @@ def update_profile_pic():
                 }
             },
         )
-        flash("تم تحديث الصورة الشخصية بنجاح", "success")
+        flash("تم تحديث الصورة الشخصية للبطاقة بنجاح!", "success")
     else:
         flash(
             "فشل رفع الصورة، يرجى التأكد من اختيار صورة أو فتح الكاميرا بشكل صحيح",
@@ -382,13 +391,15 @@ def update_profile_pic():
 @login_required
 def update_location():
     data = request.json
-    mongo.db.users.update_one(
-        {"_id": ObjectId(current_user.id)},
-        {"$set": {"lat": data.get("lat"), "lng": data.get("lng")}},
-    )
-    return jsonify(
-        {"status": "success", "message": "تم تحديث عنوان السكن عبر الخريطة بنجاح"}
-    )
+    if data and "lat" in data and "lng" in data:
+        mongo.db.users.update_one(
+            {"_id": ObjectId(current_user.id)},
+            {"$set": {"lat": data.get("lat"), "lng": data.get("lng")}},
+        )
+        return jsonify(
+            {"status": "success", "message": "تم تحديث موقعك الجغرافي بنجاح!"}
+        )
+    return jsonify({"status": "error", "message": "حدث خطأ أثناء تحديث الموقع."}), 400
 
 
 @app.route("/admin", methods=["GET", "POST"])
@@ -445,7 +456,7 @@ def admin_add_user():
             "branch": branch,
             "role": role,
             "is_verified": True,
-            "profile_pic": "https://i.ibb.co/default.png",
+            "profile_pic": "default.png",
             "last_profile_pic_update": None,
         })
         flash("تم إضافة المستخدم بنجاح بواسطة الآدمن", "success")
@@ -642,6 +653,7 @@ if __name__ == "__main__":
                 "password": generate_password_hash("admin123"),
                 "full_name": "الآدمن العام",
                 "birth_date": "1980-01-01",
+                "birth_place": "الخرطوم",
                 "age": 46,
                 "national_id": "000000000",
                 "phone": "0000000000",
@@ -650,7 +662,7 @@ if __name__ == "__main__":
                 "title_type": "آدمن الموقع",
                 "is_verified": True,
                 "is_leader": True,
-                "profile_pic": "https://i.ibb.co/default.png",
+                "profile_pic": "default.png",
                 "last_profile_pic_update": None,
             }
             mongo.db.users.insert_one(admin_user)
