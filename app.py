@@ -647,14 +647,7 @@ def set_role_and_title(user_id):
     )
     flash("تم تحديث صلاحيات ولقب المستخدم بنجاح", "success")
     return redirect(url_for("admin_dashboard"))
-    
-@app.route('/tree')
-def tree():
-    # استعلام قاعدة البيانات لجلب المستخدمين وعلاقات القربى
-    users = User.query.all() # أو حسب استعلامك لجلب المستخدمين
-    connections = [] # أو جلب العلاقات المكتشفة لديك
-    
-    return render_template('tree.html', users=users, connections=connections)
+
 
 @app.route("/moderator")
 @login_required
