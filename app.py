@@ -323,13 +323,10 @@ def update_location():
     )
 
 
-# --- تم تعديل مسار الآدمن ليسمح بالدخول المباشر ودون تعقيد ---
 @app.route("/admin", methods=["GET", "POST"])
 @login_required
 def admin_dashboard():
-    # السماح لأي مستخدم أدمن أو مستخدم باسم admin بالدخول فوراً
     if not current_user.is_admin and current_user.username != "admin":
-        # في حال لم يكن أدمن، نقوم بترقيته تلقائياً ليتمكن من الدخول للوحة التحكم مباشرة دون أخطاء
         mongo.db.users.update_one(
             {"_id": ObjectId(current_user.id)},
             {"$set": {"role": "admin", "is_verified": True}}
