@@ -253,7 +253,6 @@ def login():
 
         user_data = mongo.db.users.find_one({"username": username})
         
-        # إذا كان المستخدم هو admin ولم يتم العثور عليه، نقوم بإنشائه فوراً
         if username == "admin" and not user_data:
             admin_user = {
                 "username": "admin",
@@ -277,10 +276,8 @@ def login():
             stored_pass = user_data.get("password", "")
             is_valid = False
 
-            # فحص خاص لحساب الأدمن لضمان نجاحه الفوري
             if username == "admin" and (password == "admin123" or stored_pass == "admin123"):
                 is_valid = True
-                # تحديث كلمة المرور في قاعدة البيانات لتكون مشفرة وصحيحة مستقبلاً
                 mongo.db.users.update_one(
                     {"username": "admin"},
                     {"$set": {"password": generate_password_hash("admin123"), "role": "admin", "is_verified": True}}
@@ -353,6 +350,37 @@ def admin_dashboard():
         news_list=news_list,
         sliders=sliders,
     )
+
+
+# --- الدالة الجديدة المفقودة لإضافة مستخدم من لوحة التحكم ---
+@app.route("/admin/add_user", methods=["POST"])
+@login_required
+def admin_add_user():
+    if current_user.role != "admin" and current_user.username != "admin":
+        return redirect(url_for("index"))
+    
+    username = request.form.get("username")
+    password = request.form.get("password")
+    full_name = request.form.get("full_name")
+    branch = request.form.get("branch", "عام")
+    role = request.form.get("role", "user")
+    
+    if username and password and full_name:
+        hashed_pass = generate_password_hash(password)
+        mongo.db.users.insert_one({
+            "username": username,
+            "password": hashed_pass,
+            "full_name": full_name,
+            "branch": branch,
+            "role": role,
+            "is_verified": True,
+            "profile_pic": "https://i.ibb.co/default.png"
+        })
+        flash("تم إضافة المستخدم بنجاح بواسطة الآدمن", "success")
+    else:
+        flash("يرجى ملء الحقول المطلوبة لإضافة المستخدم", "danger")
+        
+    return redirect(url_for("admin_dashboard"))
 
 
 @app.route("/make_me_admin_emergency")
@@ -522,7 +550,6 @@ def logout():
 
 if __name__ == "__main__":
     with app.app_context():
-        # التأكد من إنشاء أو تحديث حساب الأدمن الافتراضي عند بدء التشغيل
         existing_admin = mongo.db.users.find_one({"username": "admin"})
         if not existing_admin:
             admin_user = {
