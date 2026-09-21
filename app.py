@@ -605,7 +605,7 @@ def reject_user(user_id):
 
 @app.route("/admin/delete/<string:user_id>")
 @login_required
-def delete_user(user_id):
+def delete_user_route(user_id):
     if not current_user.is_admin:
         return redirect(url_for("profile"))
 
