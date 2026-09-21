@@ -218,9 +218,20 @@ def create_topic():
 def add_comment(topic_id):
     content = request.form.get("content")
     if content:
+        try:
+            t_obj_id = ObjectId(topic_id)
+        except Exception:
+            flash("الموضوع غير موجود أو المعرف غير صالح", "danger")
+            return redirect(url_for("forum"))
+
+        topic_exists = mongo.db.forum_topics.find_one({"_id": t_obj_id})
+        if not topic_exists:
+            flash("الموضوع المطلوب غير موجود", "danger")
+            return redirect(url_for("forum"))
+
         mongo.db.forum_comments.insert_one({
             "content": content,
-            "topic_id": ObjectId(topic_id),
+            "topic_id": t_obj_id,
             "user_id": ObjectId(current_user.id),
             "created_at": datetime.utcnow(),
         })
