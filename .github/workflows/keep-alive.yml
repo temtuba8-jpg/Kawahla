@@ -3,6 +3,7 @@ name: Keep Render Alive
 on:
   schedule:
     - cron: '*/4 * * * *'
+  workflow_dispatch: # يتيح لك تشغيلها يدوياً للتأكد من أنها تعمل
 
 jobs:
   ping-server:
@@ -10,4 +11,4 @@ jobs:
     steps:
       - name: Send HTTP request to website
         run: |
-          curl -I https://kawahla.onrender.com/
+          curl -s https://kawahla.onrender.com/ > /dev/null
