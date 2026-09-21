@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 
-<!-- 1. السلايدر المتحرك (يتم التحكم بصوره وعناوينها من لوحة تحكم الآدمن) -->
+<!-- 1. السلايدر المتحرك (يدعم الروابط الخارجية لـ ImgBB والملفات المحلية) -->
 {% if sliders %}
 <div id="tribeSlider" class="carousel slide mb-5 shadow-lg rounded-4 overflow-hidden border border-warning" data-bs-ride="carousel">
     <div class="carousel-indicators">
@@ -12,7 +12,13 @@
     <div class="carousel-inner" style="max-height: 480px;">
         {% for s in sliders %}
         <div class="carousel-item {% if loop.first %}active{% endif %}">
-            <img src="{{ url_for('static', filename='uploads/' + s.image) }}" class="d-block w-100" style="object-fit: cover; height: 480px;" alt="Slider Image">
+            <!-- كود ذكي يفحص ما إذا كانت صورة السلايدر رابط ImgBB أو ملف محلي -->
+            <img src="{% if s.image %}{% if s.image.startswith('http') %}{{ s.image }}{% else %}{{ url_for('static', filename='uploads/' + s.image) }}{% endif %}{% endif %}" 
+                 class="d-block w-100 object-fit-cover" 
+                 style="height: 480px;" 
+                 alt="Slider Image"
+                 onerror="this.onerror=null; this.src='{{ url_for('static', filename='default.png') }}';">
+            
             <div class="carousel-caption d-none d-md-block p-4 rounded" style="background: rgba(0, 0, 0, 0.75);">
                 <h3 class="fw-bold text-gold">{{ s.title }}</h3>
                 <p class="fs-5 text-light">{{ s.description }}</p>
@@ -39,7 +45,7 @@
 </div>
 {% endif %}
 
-<!-- 2. قسم الأخبار والفعاليات الديناميكي (يتم نشرها من لوحة الآدمن) -->
+<!-- 2. قسم الأخبار والفعاليات الديناميكي (يدعم صور ImgBB أيضاً) -->
 <div class="mb-5">
     <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
         <h3 class="text-danger fw-bold"><i class="fas fa-newspaper me-2 text-gold"></i> أخبار وفعاليات القبيلة</h3>
@@ -51,7 +57,12 @@
         <div class="col-md-4 mb-4">
             <div class="card h-100 shadow-sm border-top border-danger border-4">
                 {% if n.image %}
-                <img src="{{ url_for('static', filename='uploads/' + n.image) }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="News Image">
+                <!-- كود ذكي لصور الأخبار -->
+                <img src="{% if n.image.startswith('http') %}{{ n.image }}{% else %}{{ url_for('static', filename='uploads/' + n.image) }}{% endif %}" 
+                     class="card-img-top object-fit-cover" 
+                     style="height: 200px;" 
+                     alt="News Image"
+                     onerror="this.style.display='none';">
                 {% endif %}
                 <div class="card-body">
                     <small class="text-muted"><i class="fas fa-calendar-alt me-1 text-gold"></i> {{ n.date }}</small>
