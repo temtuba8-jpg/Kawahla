@@ -10,4 +10,4 @@ jobs:
     steps:
       - name: Send HTTP request to website
         run: |
-          curl -I https://https://kawahla.onrender.com/
+          curl -I https://kawahla.onrender.com/
