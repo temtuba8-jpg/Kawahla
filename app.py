@@ -32,18 +32,21 @@ login_manager.login_view = "login"
 
 def upload_to_imgbb(image_input):
     if not image_input:
+        print("ImgBB Error: No image input provided.")
         return None
     try:
         url = "https://api.imgbb.com/1/upload"
         payload = {"key": IMGBB_API_KEY}
 
-        # دعم رفع ملف من الجهاز (FileStorage) أو سلسلة Base64 من الكاميرا
+        # 1. إذا كانت الصورة مرفوعة كملف من جهاز المستخدم (FileStorage)
         if hasattr(image_input, "read"):
             file_bytes = image_input.read()
             if not image_input.filename:
                 return None
             files = {"image": (image_input.filename, file_bytes)}
             response = requests.post(url, data=payload, files=files)
+            
+        # 2. إذا كانت الصورة مرسلة كنص Base64 (من الكاميرا مثلاً)
         elif isinstance(image_input, str):
             if image_input.startswith("data:image"):
                 image_input = image_input.split(",")[1]
@@ -53,8 +56,13 @@ def upload_to_imgbb(image_input):
             return None
 
         result = response.json()
+        print("ImgBB Response Data:", result) # تتبع الاستجابة في سطر الأوامر (Terminal)
+
         if result.get("success"):
-            return result["data"]["url"]
+            image_data = result.get("data", {})
+            # محاولة جلب الرابط المباشر بأكثر من طريقة ضماناً للنجاح
+            return image_data.get("url") or image_data.get("display_url")
+            
     except Exception as e:
         print(f"Error uploading to ImgBB: {e}")
     return None
@@ -79,9 +87,9 @@ class User(UserMixin):
             self.lat = user_data.get("lat", 15.5007)
             self.lng = user_data.get("lng", 32.5599)
             
-            # معالجة رابط الصورة الشخصية ليتطابق مع القالب (إذا كان رابطاً كاملاً أو اسم ملف فقط)
+            # معالجة رابط الصورة الشخصية ليعرض الرابط الصحيح
             raw_pic = user_data.get("profile_pic", "default.png")
-            if raw_pic.startswith("http"):
+            if raw_pic and raw_pic.startswith("http"):
                 self.profile_pic = raw_pic
             else:
                 self.profile_pic = raw_pic if raw_pic else "default.png"
@@ -346,7 +354,6 @@ def profile():
     return render_template("profile.html", user=current_user)
 
 
-# تم تعديل مسار استقبال الصورة ليتطابق تماماً مع اسم الحقل في قالب البروفايل (new_profile_pic)
 @app.route("/update_profile_picture", methods=["POST"])
 @login_required
 def update_profile_picture():
