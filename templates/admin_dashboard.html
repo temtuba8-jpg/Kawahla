@@ -186,7 +186,7 @@
                 <div class="col-md-8">
                     <div class="card p-4 shadow-sm border-danger">
                         <h4 class="text-danger fw-bold mb-3"><i class="fas fa-edit"></i> إنشاء ونشر موضوع رئيسي في المنتدى</h4>
-                        <form action="{{ url_for('admin_add_forum_topic') }}" method="POST">
+                        <form action="{{ url_for('create_topic') }}" method="POST">
                             <div class="mb-3">
                                 <label class="form-label fw-bold">عنوان الموضوع / المنشور:</label>
                                 <input type="text" name="title" class="form-control" placeholder="اكتب عنواناً جذاباً للمنتدى..." required>
