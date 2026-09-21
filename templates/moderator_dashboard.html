@@ -9,7 +9,13 @@
         <div class="col-md-4 mb-4">
             <div class="card shadow p-3 border-danger border-2">
                 <div class="text-center">
-                    <img src="{{ url_for('static', filename='uploads/' + u.profile_pic) }}" class="rounded-circle border border-danger mb-2" width="90" height="90">
+                    <!-- عرض الصورة الشخصية (تدعم الملفات المحلية وروابط ImgBB الخارجية مع معالج أخطاء) -->
+                    <img src="{% if u.profile_pic %}{% if u.profile_pic.startswith('http') %}{{ u.profile_pic }}{% else %}{{ url_for('static', filename='uploads/' + u.profile_pic) }}{% endif %}{% else %}{{ url_for('static', filename='default.png') }}{% endif %}" 
+                         class="rounded-circle border border-danger mb-2 object-fit-cover" 
+                         width="90" 
+                         height="90"
+                         onerror="this.onerror=null; this.src='{{ url_for('static', filename='default.png') }}';">
+                    
                     <h5 class="fw-bold text-danger">{{ u.full_name }}</h5>
                     <span class="badge bg-warning text-dark">{{ u.branch }}</span>
                 </div>
@@ -20,9 +26,14 @@
                 <p class="small mb-1"><strong>اسم الأب والجد:</strong> {{ u.father_name }} / {{ u.grandfather_name }}</p>
                 <p class="small mb-1"><strong>العنوان السكني:</strong> {{ u.residence }}</p>
                 
+                <!-- عرض المستند المثبت (يعمل بشكل صحيح مع الروابط الخارجية والملفات المحلية) -->
                 {% if u.document_pic %}
                 <div class="mt-2 text-center">
-                    <a href="{{ url_for('static', filename='uploads/' + u.document_pic) }}" target="_blank" class="btn btn-sm btn-outline-dark w-100 mb-2"><i class="fas fa-file-alt"></i> عرض المستند المثبت</a>
+                    <a href="{% if u.document_pic.startswith('http') %}{{ u.document_pic }}{% else %}{{ url_for('static', filename='uploads/' + u.document_pic) }}{% endif %}" 
+                       target="_blank" 
+                       class="btn btn-sm btn-outline-dark w-100 mb-2 shadow-sm">
+                        <i class="fas fa-file-alt"></i> عرض المستند المثبت
+                    </a>
                 </div>
                 {% endif %}
 
