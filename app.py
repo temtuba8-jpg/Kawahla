@@ -135,6 +135,12 @@ def all_news():
     return render_template("news.html", news=news_list)
 
 
+@app.route("/princes")
+def princes():
+    princes_list = list(mongo.db.users.find({"$or": [{"title_type": {"$regex": "أمير", "$options": "i"}}, {"is_leader": True}]}))
+    return render_template("princes.html", princes=[User(u) for u in princes_list])
+
+
 @app.route("/tree")
 def tree():
     users = list(mongo.db.users.find({"is_verified": True}))
