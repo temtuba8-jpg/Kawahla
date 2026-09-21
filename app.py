@@ -132,13 +132,13 @@ def index():
 @app.route("/news")
 def all_news():
     news_list = list(mongo.db.news.find().sort("_id", -1))
-    return render_template("news.html", news=news_list)
+    return render_template("forum.html", news=news_list)
 
 
 @app.route("/princes")
 def princes():
     princes_list = list(mongo.db.users.find({"$or": [{"title_type": {"$regex": "أمير", "$options": "i"}}, {"is_leader": True}]}))
-    return render_template("princes.html", princes=[User(u) for u in princes_list])
+    return render_template("leaders.html", princes=[User(u) for u in princes_list])
 
 
 @app.route("/tree")
