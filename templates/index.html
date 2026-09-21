@@ -12,7 +12,6 @@
     <div class="carousel-inner" style="max-height: 480px;">
         {% for s in sliders %}
         <div class="carousel-item {% if loop.first %}active{% endif %}">
-            <!-- كود ذكي يفحص ما إذا كانت صورة السلايدر رابط ImgBB أو ملف محلي -->
             <img src="{% if s.image %}{% if s.image.startswith('http') %}{{ s.image }}{% else %}{{ url_for('static', filename='uploads/' + s.image) }}{% endif %}{% endif %}" 
                  class="d-block w-100 object-fit-cover" 
                  style="height: 480px;" 
@@ -45,7 +44,140 @@
 </div>
 {% endif %}
 
-<!-- 2. قسم الأخبار والفعاليات الديناميكي (يدعم صور ImgBB أيضاً) -->
+
+<!-- 2. قسم نسب وتاريخ قبيلة الكواهلة (تصميم تبويبي احترافي) -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card shadow-lg border-0 rounded-4 overflow-hidden border-top border-warning border-4">
+            
+            <!-- رأس البطاقة -->
+            <div class="card-header bg-white p-4 text-center border-bottom">
+                <span class="badge bg-danger text-light px-3 py-2 mb-2">التوثيق التاريخي والأنساب</span>
+                <h2 class="fw-bold text-danger mb-1"><i class="fas id-card text-gold me-2"></i> موسوعة نسب وتاريخ قبيلة الكواهلة</h2>
+                <p class="text-muted small mb-0">الجذور، سلاسل النسب المتداولة، البطون، والانتشار الجغرافي</p>
+            </div>
+
+            <div class="card-body p-4 p-md-5 bg-light">
+                
+                <!-- شريط التنقل بين التبويبات -->
+                <ul class="nav nav-pills justify-content-center mb-4 gap-2" id="tribeTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active fw-bold px-4 rounded-pill shadow-sm" id="intro-tab" data-bs-toggle="pill" data-bs-target="#intro" type="button" role="tab">النبذة التعريفية</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-bold px-4 rounded-pill shadow-sm" id="lineage-tab" data-bs-toggle="pill" data-bs-target="#lineage" type="button" role="tab">سلسلة النسب الشريف</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-bold px-4 rounded-pill shadow-sm" id="branches-tab" data-bs-toggle="pill" data-bs-target="#branches" type="button" role="tab">الفروع والبطون</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-bold px-4 rounded-pill shadow-sm" id="geography-tab" data-bs-toggle="pill" data-bs-target="#geography" type="button" role="tab">الموطن والانتشار</button>
+                    </li>
+                </ul>
+
+                <!-- محتويات التبويبات -->
+                <div class="tab-content bg-white p-4 p-md-4 rounded-4 shadow-sm border" id="tribeTabsContent">
+                    
+                    <!-- 1. النبذة التعريفية -->
+                    <div class="tab-pane fade show active" id="intro" role="tabpanel" aria-labelledby="intro-tab">
+                        <h4 class="fw-bold text-danger mb-3 border-bottom pb-2"><i class="fas fa-info-circle text-gold me-2"></i> أصالة وعراقة الكواهلة</h4>
+                        <p class="text-secondary" style="line-height: 1.9;">
+                            تُعد قبيلة الكواهلة من القبائل العربية الكبيرة والمعروفة في السودان، ويُعرف أبناؤها كذلك باسم <strong>بني كاهل</strong> أو <strong>أولاد كاهل</strong>. وقد عُرف للكواهلة انتشار واسع في السودان، ولا سيما على امتداد مناطق النيل الأبيض والنيل الأزرق والجزيرة والبطانة وشمال وشرق السودان وكردفان، كما امتد وجودهم إلى مصر والمملكة العربية السعودية وغيرها من البلدان.
+                        </p>
+                        <p class="text-secondary" style="line-height: 1.9;">
+                            ويرجع اسم الكواهلة إلى جد القبيلة <strong>كاهل</strong>، وتتناقل بطون القبيلة رواية نسبية مشهورة تربط جدهم كاهلًا بذرية الصحابي الجليل <strong>الزبير بن العوام رضي الله عنه</strong>، وهو من بني أسد من قريش، وأحد العشرة المبشرين بالجنة.
+                        </p>
+                    </div>
+
+                    <!-- 2. سلسلة النسب الشريف -->
+                    <div class="tab-pane fade" id="lineage" role="tabpanel" aria-labelledby="lineage-tab">
+                        <h4 class="fw-bold text-danger mb-3 border-bottom pb-2"><i class="fas fa-sitemap text-gold me-2"></i> التسلسل النسبي والارتباط القرشي</h4>
+                        <p class="text-secondary mb-3">ومن أشهر ما ترويه نسابة الكواهلة في السودان لسلسلة النسب المتداولة:</p>
+                        
+                        <div class="p-3 bg-light rounded border border-warning text-center fw-bold text-dark mb-4 shadow-sm" style="font-size: 0.95rem; line-height: 2.2;">
+                            كاهل بن عامر بن مدش بن موسى <span class="text-danger">(الملقب بالتنين)</span> بن عبد الله بن الزبير بن العوام بن خويلد بن أسد بن عبد العزى بن قصي بن كلاب بن مرة بن كعب بن لؤي بن غالب بن فهر بن مالك بن النضر بن كنانة.
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="p-3 bg-light rounded border h-100">
+                                    <h5 class="fw-bold text-danger small"><i class="fas fa-star text-gold me-1"></i> التعريف بالزبير بن العوام</h5>
+                                    <p class="text-muted small mb-0">هو الزبير بن العوام الأسدي القرشي، وأمه صفية بنت عبد المطلب عمة النبي محمد صلى الله عليه وسلم، وزوجته أسماء بنت أبي بكر الصديق رضي الله عنهما، وهي أم ابنه عبد الله بن الزبير.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 bg-light rounded border h-100">
+                                    <h5 class="fw-bold text-danger small"><i class="fas fa-code-branch text-gold me-1"></i> تعدد الصيغ والروايات</h5>
+                                    <p class="text-muted small mb-0">توجد صيغ متقاربة أخرى لدى بعض النسابة (مثل ورود محمد كاهل بن عابد بن يحيى)، إلا أن الرواية الزبيرية تظل هي الأشهر والأبرز في الموروث القبلي للكواهلة في السودان.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. الفروع والبطون -->
+                    <div class="tab-pane fade" id="branches" role="tabpanel" aria-labelledby="branches-tab">
+                        <h4 class="fw-bold text-danger mb-3 border-bottom pb-2"><i class="fas fa-users text-gold me-2"></i> بطون وفروع قبيلة الكواهلة</h4>
+                        <p class="text-secondary mb-3">تنسب روايات الكواهلة إلى كاهل عددًا كبيرًا من البطون والفروع التي انتشرت في أنحاء السودان، ومن أشهر هذه الأسماء:</p>
+                        
+                        <div class="d-flex flex-wrap gap-2 mb-4">
+                            <span class="badge bg-secondary px-3 py-2 fs-6">الحسانية</span>
+                            <span class="badge bg-secondary px-3 py-2 fs-6">الحسنات</span>
+                            <span class="badge bg-secondary px-3 py-2 fs-6">الأحامدة</span>
+                            <span class="badge bg-secondary px-3 py-2 fs-6">الشدايدة</span>
+                            <span class="badge bg-secondary px-3 py-2 fs-6">الجلالية</span>
+                            <span class="badge bg-secondary px-3 py-2 fs-6">المطارفة</span>
+                            <span class="badge bg-secondary px-3 py-2 fs-6">الخلائف</span>
+                            <span class="badge bg-secondary px-3 py-2 fs-6">البشارية</span>
+                            <span class="badge bg-secondary px-3 py-2 fs-6">الكمالاب</span>
+                            <span class="badge bg-secondary px-3 py-2 fs-6">الكميلاب</span>
+                            <span class="badge bg-secondary px-3 py-2 fs-6">الوامل</span>
+                            <span class="badge bg-secondary px-3 py-2 fs-6">الكيلاب</span>
+                            <span class="badge bg-secondary px-3 py-2 fs-6">الغزايا</span>
+                            <span class="badge bg-secondary px-3 py-2 fs-6">البراقنة</span>
+                            <span class="badge bg-secondary px-3 py-2 fs-6">القريشاب</span>
+                            <span class="badge bg-secondary px-3 py-2 fs-6">المرغوماب</span>
+                            <span class="badge bg-secondary px-3 py-2 fs-6">المحمدية</span>
+                            <span class="badge bg-secondary px-3 py-2 fs-6">الأساودة</span>
+                            <span class="badge bg-secondary px-3 py-2 fs-6">البصيراب</span>
+                            <span class="badge bg-secondary px-3 py-2 fs-6">البدارنة</span>
+                            <span class="badge bg-secondary px-3 py-2 fs-6">الشلاعنة</span>
+                            <span class="badge bg-secondary px-3 py-2 fs-6">الكرتان</span>
+                            <span class="badge bg-secondary px-3 py-2 fs-6">المايدية</span>
+                            <span class="badge bg-secondary px-3 py-2 fs-6">النفيدية</span>
+                            <span class="badge bg-secondary px-3 py-2 fs-6">الزوايدة</span>
+                            <span class="badge bg-secondary px-3 py-2 fs-6">اليزيدية</span>
+                            <span class="badge bg-secondary px-3 py-2 fs-6">الدليقاب</span>
+                            <span class="badge bg-secondary px-3 py-2 fs-6">الشنابلة</span>
+                        </div>
+                        <p class="text-muted small mb-0">تشير الروايات إلى أن من أبناء كاهل (خليفة وأبرق)، ومن ذرية خليفة جاء حسان (جد الحسانية)، بينما تتفرع من أبرق وآخرين بقية البطون، وهو ما يفسر اتساع التشعب الداخلي للقبيلة.</p>
+                    </div>
+
+                    <!-- 4. الموطن والانتشار -->
+                    <div class="tab-pane fade" id="geography" role="tabpanel" aria-labelledby="geography-tab">
+                        <h4 class="fw-bold text-danger mb-3 border-bottom pb-2"><i class="fas fa-map-marked-alt text-gold me-2"></i> الموطن والامتداد الجغرافي</h4>
+                        <p class="text-secondary" style="line-height: 1.8;">
+                            ارتبط تاريخ الكواهلة في السودان بمناطق واسعة، فانتشروا بمحاذاة النيل، ثم امتد وجودهم إلى **النيل الأبيض والنيل الأزرق والجزيرة والبطانة وشمال كردفان وشرق السودان**، وتوجد لهم فروع ومجموعات في مناطق أخرى من السودان، بالإضافة إلى وجودهم في **مصر والمملكة العربية السعودية**.
+                        </p>
+                        <p class="text-secondary" style="line-height: 1.8;">
+                            وتذكر بعض المصادر التاريخية أن جماعات من أولاد كاهل كانت معروفة في منطقة البحر الأحمر وعيذاب في العصور الوسطى.
+                        </p>
+                        
+                        <!-- كلمة جامعة وخاتمة -->
+                        <div class="p-3 bg-light rounded-3 border-start border-warning border-4 text-secondary small mt-3">
+                            <i class="fas fa-university text-gold me-1"></i>
+                            <strong>كلمة جامعة:</strong> يشكل الكواهلة امتدادًا قبليًا واسعًا أسهم بفعالية في الحياة الاجتماعية والاقتصادية والزراعية والرعوية والتجارية بالسودان. ويُحفظ هذا النسب التليد باعتباره أشهر الروايات المتوارثة، مع مراعاة اختلاف المصادر التاريخية في بعض التفاصيل الجزئية لأنساب الفروع.
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- 3. قسم الأخبار والفعاليات الديناميكي (يدعم صور ImgBB أيضاً) -->
 <div class="mb-5">
     <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
         <h3 class="text-danger fw-bold"><i class="fas fa-newspaper me-2 text-gold"></i> أخبار وفعاليات القبيلة</h3>
@@ -79,29 +211,57 @@
     </div>
 </div>
 
-<!-- 3. الأقسام الثلاثة الأساسية (أخبار، أمراء، بطاقة رقمية) -->
+<!-- 4. الأقسام الثلاثة الأساسية (أخبار، أمراء، بطاقة رقمية) - روابط تفاعلية -->
 <div class="row text-center mt-5">
     <div class="col-md-4 mb-4">
-        <div class="card p-4 shadow-sm border-top border-danger border-4 h-100">
-            <i class="fas fa-newspaper fa-3x text-danger mb-3"></i>
-            <h3 class="h4 fw-bold text-danger">أخبار القبيلة</h3>
-            <p class="text-muted small">تابع أحدث أخبار وفعاليات أبناء الكواهلة وفروعها في السودان وكل مكان.</p>
-        </div>
+        <a href="{{ url_for('news') }}" class="text-decoration-none">
+            <div class="card p-4 shadow-sm border-top border-danger border-4 h-100 feature-card transition-effect">
+                <i class="fas fa-newspaper fa-3x text-danger mb-3"></i>
+                <h3 class="h4 fw-bold text-danger">أخبار القبيلة</h3>
+                <p class="text-muted small">تابع أحدث أخبار وفعاليات أبناء الكواهلة وفروعها في السودان وكل مكان.</p>
+                <span class="btn btn-outline-danger btn-sm mt-auto fw-bold">تصفح الأخبار <i class="fas fa-arrow-left ms-1"></i></span>
+            </div>
+        </a>
     </div>
     <div class="col-md-4 mb-4">
-        <div class="card p-4 shadow-sm border-top border-warning border-4 h-100">
-            <i class="fas fa-crown fa-3x text-warning mb-3"></i>
-            <h3 class="h4 fw-bold" style="color: #b89728;">الأمراء والقيادات</h3>
-            <p class="text-muted small">قسم خاص لتوثيق أمراء الفروع والشخصيات الهامة والرموز التاريخية.</p>
-        </div>
+        <a href="{{ url_for('princes') }}" class="text-decoration-none">
+            <div class="card p-4 shadow-sm border-top border-warning border-4 h-100 feature-card transition-effect">
+                <i class="fas fa-crown fa-3x text-warning mb-3"></i>
+                <h3 class="h4 fw-bold" style="color: #b89728;">الأمراء والقيادات</h3>
+                <p class="text-muted small">قسم خاص لتوثيق أمراء الفروع والشخصيات الهامة والرموز التاريخية.</p>
+                <span class="btn btn-outline-warning btn-sm mt-auto fw-bold text-dark">تصفح الأمراء <i class="fas fa-arrow-left ms-1"></i></span>
+            </div>
+        </a>
     </div>
     <div class="col-md-4 mb-4">
-        <div class="card p-4 shadow-sm border-top border-danger border-4 h-100">
-            <i class="fas fa-id-card fa-3x text-danger mb-3"></i>
-            <h3 class="h4 fw-bold text-danger">البطاقة الرقمية</h3>
-            <p class="text-muted small">بطاقة تعريفية رسمية لكل كاهلي موثقة برمز التأكيد وهویة القبيلة.</p>
-        </div>
+        <a href="{{ url_for('profile') }}" class="text-decoration-none">
+            <div class="card p-4 shadow-sm border-top border-danger border-4 h-100 feature-card transition-effect">
+                <i class="fas fa-id-card fa-3x text-danger mb-3"></i>
+                <h3 class="h4 fw-bold text-danger">البطاقة الرقمية</h3>
+                <p class="text-muted small">بطاقة تعريفية رسمية لكل كاهلي موثقة برمز التأكيد وهویة القبيلة.</p>
+                <span class="btn btn-outline-danger btn-sm mt-auto fw-bold">عرض بطاقتي <i class="fas fa-arrow-left ms-1"></i></span>
+            </div>
+        </a>
     </div>
 </div>
+
+<!-- تأثيرات بسيطة للبطاقات -->
+<style>
+.transition-effect {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.transition-effect:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+}
+.nav-pills .nav-link.active {
+    background-color: var(--bs-danger, #dc3545) !important;
+    color: #fff !important;
+}
+.nav-pills .nav-link {
+    color: #495057;
+    background-color: #e9ecef;
+}
+</style>
 
 {% endblock %}
