@@ -86,10 +86,11 @@
                     <div class="row align-items-center">
                         <div class="col-4 text-center border-start">
                             <div class="position-relative d-inline-block">
-                                <img src="{{ url_for('static', filename='uploads/' + user.profile_pic) }}" 
+                                <img src="{{ user.profile_pic if user.profile_pic and user.profile_pic.startswith('http') else url_for('static', filename='uploads/' + (user.profile_pic if user.profile_pic else 'default.png')) }}" 
                                      alt="صورة العضو" 
                                      class="rounded shadow-sm" 
-                                     style="width: 105px; height: 130px; object-fit: cover; border: 2px solid #b30000;">
+                                     style="width: 105px; height: 130px; object-fit: cover; border: 2px solid #b30000;"
+                                     onerror="this.src='{{ url_for('static', filename='default.png') }}';">
                             </div>
                             <div class="mt-1">
                                 <span class="badge bg-danger" style="font-size: 9px;">فرع: {{ user.branch }}</span>
@@ -159,7 +160,6 @@
             <form action="{{ url_for('update_profile_picture') }}" method="POST" enctype="multipart/form-data">
                 <div class="mb-3">
                     <label class="form-label fw-bold">اختر الصورة الجديدة (أو افتح الكاميرا):</label>
-                    <!-- خاصية capture="user" تفتح الكاميرا الأمامية للجوال مباشرة عند النقر من الهاتف المحمول -->
                     <input type="file" name="new_profile_pic" class="form-control" accept="image/*" capture="user" required>
                     <div class="form-text text-muted">يمكنك التقاط صورة سيلفي مباشرة بالكاميرا أو اختيار صورة جاهزة من استوديو الجوال.</div>
                 </div>
