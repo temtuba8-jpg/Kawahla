@@ -32,17 +32,17 @@
         <div class="position-relative mx-auto" style="max-width: 650px;">
             
             <!-- أيقونة سوداس باس في الأعلى -->
-<div class="text-start mb-2" style="z-index: 10;">
-    <div class="d-inline-block text-center bg-white border border-warning rounded p-1 shadow-sm">
-        <img src="{{ url_for('static', filename='uploads/1.png') }}" 
-             alt="سوداس باس" 
-             width="35" 
-             height="35" 
-             class="rounded-circle object-fit-cover"
-             onerror="this.onerror=null; this.src='{{ url_for('static', filename='uploads/1.PNG') }}';">
-        <div style="font-size: 8px;" class="badge bg-dark text-warning mt-1">سوداس باس قريباً</div>
-    </div>
-</div>
+            <div class="text-start mb-2" style="z-index: 10;">
+                <div class="d-inline-block text-center bg-white border border-warning rounded p-1 shadow-sm">
+                    <img src="{{ url_for('static', filename='uploads/1.png') }}" 
+                         alt="سوداس باس" 
+                         width="35" 
+                         height="35" 
+                         class="rounded-circle object-fit-cover"
+                         onerror="this.onerror=null; this.src='{{ url_for('static', filename='uploads/1.PNG') }}';">
+                    <div style="font-size: 8px;" class="badge bg-dark text-warning mt-1">سوداس باس قريباً</div>
+                </div>
+            </div>
 
             <!-- بطاقة الهوية الرسمية -->
             <div id="printable-card" class="card id-card {% if not user.is_verified %}id-blur{% endif %} shadow-lg border-2 border-danger rounded-4 overflow-hidden position-relative" style="background: linear-gradient(135deg, #fdfbf7 0%, #f1eae1 100%);">
@@ -68,13 +68,9 @@
                         </div>
 
                         <div class="text-end">
+                            <!-- صورة علم السودان (sudan.png) بدلاً من الرسم البرمجي الخطأ -->
                             <div class="border px-1 py-0 bg-white d-inline-block rounded shadow-sm mb-1">
-                                <div style="width: 24px; height: 13px; background: #000; position: relative;">
-                                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 33%; background: red;"></div>
-                                    <div style="position: absolute; top: 33%; left: 0; width: 100%; height: 34%; background: white;"></div>
-                                    <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 33%; background: forestgreen;"></div>
-                                    <div style="position: absolute; top: 0; left: 0; width: 35%; height: 100%; background: #000;"></div>
-                                </div>
+                                <img src="{{ url_for('static', filename='uploads/sudan.png') }}" alt="علم السودان" width="30" height="16" class="object-fit-cover" onerror="this.src='{{ url_for('static', filename='default.png') }}';">
                             </div>
                             <div class="text-danger fw-bold" style="font-size: 10px; font-family: monospace;">{{ user.national_id }}</div>
                         </div>
