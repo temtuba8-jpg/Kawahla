@@ -56,11 +56,10 @@ def upload_to_imgbb(image_input):
             return None
 
         result = response.json()
-        print("ImgBB Response Data:", result) # تتبع الاستجابة في سطر الأوامر (Terminal)
+        print("ImgBB Response Data:", result)
 
         if result.get("success"):
             image_data = result.get("data", {})
-            # محاولة جلب الرابط المباشر بأكثر من طريقة ضماناً للنجاح
             return image_data.get("url") or image_data.get("display_url")
             
     except Exception as e:
@@ -87,7 +86,6 @@ class User(UserMixin):
             self.lat = user_data.get("lat", 15.5007)
             self.lng = user_data.get("lng", 32.5599)
             
-            # معالجة رابط الصورة الشخصية ليعرض الرابط الصحيح
             raw_pic = user_data.get("profile_pic", "default.png")
             if raw_pic and raw_pic.startswith("http"):
                 self.profile_pic = raw_pic
@@ -104,6 +102,10 @@ class User(UserMixin):
     @property
     def is_admin(self):
         return self.role == "admin" or self.username == "admin"
+
+    @property
+    def is_moderator(self):
+        return self.role == "moderator"
 
 
 @login_manager.user_loader
@@ -180,8 +182,8 @@ def forum():
 @app.route("/forum/create", methods=["POST"])
 @login_required
 def create_topic():
-    if not current_user.is_admin and current_user.role != "moderator":
-        flash("عفواً، إنشاء المواضيع مقتصر على الإدارة فقط.", "danger")
+    if not current_user.is_admin and not current_user.is_moderator:
+        flash("عفواً، إنشاء المواضيع مقتصر على الإدارة والمشرفين فقط.", "danger")
         return redirect(url_for("forum"))
 
     title = request.form.get("title")
@@ -337,9 +339,9 @@ def login():
             if is_valid:
                 user_obj = User(user_data)
                 login_user(user_obj)
-                if user_obj.role == "admin" or user_obj.username == "admin":
+                if user_obj.is_admin:
                     return redirect(url_for("admin_dashboard"))
-                elif user_obj.role == "moderator":
+                elif user_obj.is_moderator:
                     return redirect(url_for("moderator_dashboard"))
                 else:
                     return redirect(url_for("profile"))
@@ -412,7 +414,7 @@ def update_location():
 @app.route("/admin", methods=["GET", "POST"])
 @login_required
 def admin_dashboard():
-    if not current_user.is_admin and current_user.username != "admin":
+    if not current_user.is_admin:
         flash("عفواً، ليس لديك صلاحية للوصول إلى لوحة التحكم.", "danger")
         return redirect(url_for("profile"))
 
@@ -555,7 +557,7 @@ def delete_slider(slider_id):
 @app.route("/admin/verify/<string:user_id>")
 @login_required
 def verify_user(user_id):
-    if not current_user.is_admin:
+    if not current_user.is_admin and not current_user.is_moderator:
         return redirect(url_for("profile"))
 
     mongo.db.users.update_one(
@@ -568,7 +570,7 @@ def verify_user(user_id):
 @app.route("/admin/reject/<string:user_id>")
 @login_required
 def reject_user(user_id):
-    if not current_user.is_admin:
+    if not current_user.is_admin and not current_user.is_moderator:
         return redirect(url_for("profile"))
 
     mongo.db.users.update_one(
@@ -631,13 +633,17 @@ def set_role_and_title(user_id):
             }
         },
     )
-    flash("تم تحديث صلاحيات ولقب المستخدم", "success")
+    flash("تم تحديث صلاحيات ولقب المستخدم بنجاح", "success")
     return redirect(url_for("admin_dashboard"))
 
 
 @app.route("/moderator")
 @login_required
 def moderator_dashboard():
+    if not current_user.is_admin and not current_user.is_moderator:
+        flash("عفواً، ليس لديك صلاحية للوصول إلى لوحة المشرفين.", "danger")
+        return redirect(url_for("profile"))
+
     pending_users = [
         User(u) for u in mongo.db.users.find({"is_verified": False})
     ]
