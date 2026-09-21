@@ -9,26 +9,26 @@
     <!-- تبويبات التنقل داخل لوحة الآدمن -->
     <ul class="nav nav-tabs mb-4 border-danger flex-wrap" id="adminTabs" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active fw-bold text-danger" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button"><i class="fas fa-users me-1"></i> إدارة المستخدمين والتوثيق</button>
+            <button class="nav-link active fw-bold text-danger" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button" role="tab"><i class="fas fa-users me-1"></i> إدارة المستخدمين والتوثيق</button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link fw-bold text-danger" id="adduser-tab" data-bs-toggle="tab" data-bs-target="#adduser" type="button"><i class="fas fa-user-plus me-1"></i> إضافة يوزر / مشرف جديد</button>
+            <button class="nav-link fw-bold text-danger" id="adduser-tab" data-bs-toggle="tab" data-bs-target="#adduser" type="button" role="tab"><i class="fas fa-user-plus me-1"></i> إضافة يوزر / مشرف جديد</button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link fw-bold text-danger" id="forum-tab" data-bs-toggle="tab" data-bs-target="#forum" type="button"><i class="fas fa-comments me-1"></i> إضافة منشور للمنتدى</button>
+            <button class="nav-link fw-bold text-danger" id="forum-tab" data-bs-toggle="tab" data-bs-target="#forum" type="button" role="tab"><i class="fas fa-comments me-1"></i> إضافة منشور للمنتدى</button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link fw-bold text-danger" id="news-tab" data-bs-toggle="tab" data-bs-target="#news" type="button"><i class="fas fa-newspaper me-1"></i> إدارة ونشر الأخبار</button>
+            <button class="nav-link fw-bold text-danger" id="news-tab" data-bs-toggle="tab" data-bs-target="#news" type="button" role="tab"><i class="fas fa-newspaper me-1"></i> إدارة ونشر الأخبار</button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link fw-bold text-danger" id="slider-tab" data-bs-toggle="tab" data-bs-target="#slider" type="button"><i class="fas fa-images me-1"></i> إدارة سلايدر الرئيسية</button>
+            <button class="nav-link fw-bold text-danger" id="slider-tab" data-bs-toggle="tab" data-bs-target="#slider" type="button" role="tab"><i class="fas fa-images me-1"></i> إدارة سلايدر الرئيسية</button>
         </li>
     </ul>
 
     <div class="tab-content" id="adminTabsContent">
         
         <!-- ================= القسم الأول: إدارة المستخدمين والتوثيق ================= -->
-        <div class="tab-pane fade show active" id="users" role="tabpanel">
+        <div class="tab-pane fade show active" id="users" role="tabpanel" aria-labelledby="users-tab">
             <div class="card p-3 mb-4 shadow-sm bg-light border-danger">
                 <form method="GET" action="{{ url_for('admin_dashboard') }}" class="row g-3 align-items-center">
                     <div class="col-md-9">
@@ -115,8 +115,8 @@
             </div>
         </div>
 
-        <!-- ================= القسم الجديد: إضافة يوزر أو مشرف جديد ================= -->
-        <div class="tab-pane fade" id="adduser" role="tabpanel">
+        <!-- ================= القسم الثاني: إضافة يوزر أو مشرف جديد ================= -->
+        <div class="tab-pane fade" id="adduser" role="tabpanel" aria-labelledby="adduser-tab">
             <div class="row justify-content-center">
                 <div class="col-md-8">
                     <div class="card p-4 shadow-sm border-danger">
@@ -180,8 +180,8 @@
             </div>
         </div>
 
-        <!-- ================= القسم الجديد: إضافة منشور للمنتدى ================= -->
-        <div class="tab-pane fade" id="forum" role="tabpanel">
+        <!-- ================= القسم الثالث: إضافة منشور للمنتدى ================= -->
+        <div class="tab-pane fade" id="forum" role="tabpanel" aria-labelledby="forum-tab">
             <div class="row justify-content-center">
                 <div class="col-md-8">
                     <div class="card p-4 shadow-sm border-danger">
@@ -202,8 +202,8 @@
             </div>
         </div>
 
-        <!-- ================= القسم الثالث: إدارة ونشر الأخبار ================= -->
-        <div class="tab-pane fade" id="news" role="tabpanel">
+        <!-- ================= القسم الرابع: إدارة ونشر الأخبار ================= -->
+        <div class="tab-pane fade" id="news" role="tabpanel" aria-labelledby="news-tab">
             <div class="row">
                 <div class="col-md-5 mb-4">
                     <div class="card p-4 shadow-sm border-danger">
@@ -248,8 +248,8 @@
             </div>
         </div>
 
-        <!-- ================= القسم الرابع: إدارة سلايدر الرئيسية ================= -->
-        <div class="tab-pane fade" id="slider" role="tabpanel">
+        <!-- ================= القسم الخامس: إدارة سلايدر الرئيسية ================= -->
+        <div class="tab-pane fade" id="slider" role="tabpanel" aria-labelledby="slider-tab">
             <div class="row">
                 <div class="col-md-5 mb-4">
                     <div class="card p-4 shadow-sm border-danger">
