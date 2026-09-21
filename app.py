@@ -1,8 +1,17 @@
 
 from datetime import datetime, timedelta
 import os
+
 from bson.objectid import ObjectId
-from flask import Flask, flash, jsonify, redirect, render_template, request, url_for
+from flask import (
+    Flask,
+    flash,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
 from flask_login import (
     LoginManager,
     UserMixin,
@@ -15,7 +24,9 @@ from flask_pymongo import PyMongo
 import requests
 from werkzeug.security import check_password_hash, generate_password_hash
 
+
 app = Flask(__name__)
+
 app.config["SECRET_KEY"] = "kawahla_secret_key_2026_super_secure"
 
 # إعداد اتصال MongoDB السحابي
@@ -28,10 +39,15 @@ app.config["MONGO_URI"] = (
 IMGBB_API_KEY = "cc5590cadcc0d03fc63bbb5317442839"
 
 mongo = PyMongo(app)
+
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 
+
+# =========================================================
+# رفع الصور إلى ImgBB
+# =========================================================
 
 def upload_to_imgbb(image_input):
     if not image_input:
@@ -44,23 +60,35 @@ def upload_to_imgbb(image_input):
 
         # 1. إذا كانت الصورة مرفوعة كملف من جهاز المستخدم
         if hasattr(image_input, "read"):
-            file_bytes = image_input.read()
 
             if not image_input.filename:
                 return None
 
+            file_bytes = image_input.read()
+
+            if not file_bytes:
+                return None
+
             files = {
-                "image": (image_input.filename, file_bytes)
+                "image": (
+                    image_input.filename,
+                    file_bytes
+                )
             }
 
             response = requests.post(
                 url,
                 data=payload,
-                files=files
+                files=files,
+                timeout=60
             )
 
         # 2. إذا كانت الصورة مرسلة كنص Base64
         elif isinstance(image_input, str):
+
+            if not image_input.strip():
+                return None
+
             if image_input.startswith("data:image"):
                 image_input = image_input.split(",", 1)[1]
 
@@ -68,7 +96,8 @@ def upload_to_imgbb(image_input):
 
             response = requests.post(
                 url,
-                data=payload
+                data=payload,
+                timeout=60
             )
 
         else:
@@ -92,47 +121,85 @@ def upload_to_imgbb(image_input):
     return None
 
 
+# =========================================================
+# User Class
+# =========================================================
+
 class User(UserMixin):
+
     def __init__(self, user_data):
+
         if user_data:
-            self.id = str(user_data.get("_id"))
-            self.username = user_data.get("username", "")
-            self.password = user_data.get("password", "")
-            self.full_name = user_data.get("full_name", "مستخدم")
+
+            self.id = str(
+                user_data.get("_id")
+            )
+
+            self.username = user_data.get(
+                "username",
+                ""
+            )
+
+            self.password = user_data.get(
+                "password",
+                ""
+            )
+
+            self.full_name = user_data.get(
+                "full_name",
+                "مستخدم"
+            )
+
             self.birth_date = user_data.get(
                 "birth_date",
                 "2000-01-01"
             )
+
             self.birth_place = user_data.get(
                 "birth_place",
                 "السودان"
             )
-            self.age = user_data.get("age", 25)
+
+            self.age = user_data.get(
+                "age",
+                25
+            )
+
             self.national_id = user_data.get(
                 "national_id",
                 ""
             )
-            self.phone = user_data.get("phone", "")
+
+            self.phone = user_data.get(
+                "phone",
+                ""
+            )
+
             self.branch = user_data.get(
                 "branch",
                 "عام"
             )
+
             self.father_name = user_data.get(
                 "father_name",
                 ""
             )
+
             self.grandfather_name = user_data.get(
                 "grandfather_name",
                 ""
             )
+
             self.residence = user_data.get(
                 "residence",
                 "الخرطوم، السودان"
             )
+
             self.lat = user_data.get(
                 "lat",
                 15.5007
             )
+
             self.lng = user_data.get(
                 "lng",
                 32.5599
@@ -143,7 +210,7 @@ class User(UserMixin):
                 "default.png"
             )
 
-            if raw_pic and raw_pic.startswith("http"):
+            if raw_pic and str(raw_pic).startswith("http"):
                 self.profile_pic = raw_pic
             else:
                 self.profile_pic = (
@@ -193,11 +260,19 @@ class User(UserMixin):
         return self.role == "moderator"
 
 
+# =========================================================
+# Flask Login
+# =========================================================
+
 @login_manager.user_loader
 def load_user(user_id):
+
     try:
+
         user_data = mongo.db.users.find_one(
-            {"_id": ObjectId(user_id)}
+            {
+                "_id": ObjectId(user_id)
+            }
         )
 
         if user_data:
@@ -209,8 +284,13 @@ def load_user(user_id):
     return None
 
 
+# =========================================================
+# الصفحة الرئيسية
+# =========================================================
+
 @app.route("/")
 def index():
+
     news_list = list(
         mongo.db.news.find()
     )
@@ -221,7 +301,9 @@ def index():
 
     leaders = list(
         mongo.db.users.find(
-            {"is_leader": True}
+            {
+                "is_leader": True
+            }
         )
     )
 
@@ -233,8 +315,13 @@ def index():
     )
 
 
+# =========================================================
+# الأخبار
+# =========================================================
+
 @app.route("/news")
 def all_news():
+
     news_list = list(
         mongo.db.news.find().sort(
             "_id",
@@ -248,8 +335,13 @@ def all_news():
     )
 
 
+# =========================================================
+# الأمراء
+# =========================================================
+
 @app.route("/princes")
 def princes():
+
     princes_list = list(
         mongo.db.users.find(
             {
@@ -277,17 +369,25 @@ def princes():
     )
 
 
+# =========================================================
+# شجرة القبيلة
+# =========================================================
+
 @app.route("/tree")
 def tree():
+
     users = list(
         mongo.db.users.find(
-            {"is_verified": True}
+            {
+                "is_verified": True
+            }
         )
     )
 
     connections = []
 
     for i in range(len(users)):
+
         for j in range(i + 1, len(users)):
 
             f1 = users[i].get(
@@ -303,6 +403,7 @@ def tree():
                 and f2
                 and f1.strip() == f2.strip()
             ):
+
                 connections.append(
                     {
                         "p1": users[i].get(
@@ -328,11 +429,18 @@ def tree():
     )
 
 
+# =========================================================
+# القيادات
+# =========================================================
+
 @app.route("/leaders")
 def leaders():
+
     leader_users = list(
         mongo.db.users.find(
-            {"is_leader": True}
+            {
+                "is_leader": True
+            }
         )
     )
 
@@ -352,7 +460,9 @@ def leaders():
 @app.route("/forum")
 @login_required
 def forum():
+
     try:
+
         topics = list(
             mongo.db.forum_topics.find().sort(
                 "_id",
@@ -365,18 +475,29 @@ def forum():
             # -------------------------------------------------
             # صاحب الموضوع
             # -------------------------------------------------
+
             topic["author"] = None
 
-            user_id = topic.get("user_id")
+            user_id = topic.get(
+                "user_id"
+            )
 
             if user_id:
 
                 try:
-                    if isinstance(user_id, str):
-                        user_id = ObjectId(user_id)
+
+                    if isinstance(
+                        user_id,
+                        str
+                    ):
+                        user_id = ObjectId(
+                            user_id
+                        )
 
                     author_data = mongo.db.users.find_one(
-                        {"_id": user_id}
+                        {
+                            "_id": user_id
+                        }
                     )
 
                     if author_data:
@@ -385,6 +506,7 @@ def forum():
                         )
 
                 except Exception as e:
+
                     print(
                         "Forum author error:",
                         e
@@ -393,9 +515,11 @@ def forum():
             # -------------------------------------------------
             # التعليقات
             # -------------------------------------------------
+
             comments = []
 
             try:
+
                 comments = list(
                     mongo.db.forum_comments.find(
                         {
@@ -408,6 +532,7 @@ def forum():
                 )
 
             except Exception as e:
+
                 print(
                     "Forum comments error:",
                     e
@@ -445,6 +570,7 @@ def forum():
                             )
 
                     except Exception as e:
+
                         print(
                             "Comment author error:",
                             e
@@ -455,36 +581,140 @@ def forum():
             # -------------------------------------------------
             # تجهيز الاستطلاع
             # -------------------------------------------------
+
             if topic.get("poll"):
 
-                poll = topic["poll"]
+                poll = topic.get(
+                    "poll"
+                )
 
-                poll_id = poll.get("_id")
+                if not isinstance(
+                    poll,
+                    dict
+                ):
+                    topic["poll"] = None
+                    continue
 
-                total_votes = 0
+                # -------------------------------------------------
+                # ضمان وجود poll._id
+                # -------------------------------------------------
 
-                for option in poll.get(
+                poll_id = poll.get(
+                    "_id"
+                )
+
+                if not poll_id:
+
+                    # إذا كان الاستطلاع القديم لا يملك ID
+                    # نستخدم ID جديدًا ونحفظه
+                    poll_id = ObjectId()
+
+                    try:
+
+                        mongo.db.forum_topics.update_one(
+                            {
+                                "_id": topic["_id"]
+                            },
+                            {
+                                "$set": {
+                                    "poll._id": poll_id
+                                }
+                            }
+                        )
+
+                    except Exception as e:
+
+                        print(
+                            "Poll ID update error:",
+                            e
+                        )
+
+                poll["_id"] = poll_id
+
+                # -------------------------------------------------
+                # تجهيز الخيارات
+                # -------------------------------------------------
+
+                raw_options = poll.get(
                     "options",
                     []
-                ):
-                    try:
-                        total_votes += int(
+                )
+
+                normalized_options = []
+
+                for option in raw_options:
+
+                    # إذا كان الخيار محفوظًا كـ dict
+                    if isinstance(
+                        option,
+                        dict
+                    ):
+
+                        option_text = str(
                             option.get(
-                                "votes",
-                                0
+                                "text",
+                                ""
                             )
                         )
-                    except Exception:
-                        pass
+
+                        try:
+
+                            option_votes = int(
+                                option.get(
+                                    "votes",
+                                    0
+                                ) or 0
+                            )
+
+                        except Exception:
+
+                            option_votes = 0
+
+                    # توافق مع أي استطلاع قديم
+                    # كانت الخيارات فيه نصوصًا
+                    else:
+
+                        option_text = str(
+                            option
+                        )
+
+                        option_votes = 0
+
+                    normalized_options.append(
+                        {
+                            "text": option_text,
+                            "votes": option_votes
+                        }
+                    )
+
+                poll["options"] = normalized_options
+
+                # -------------------------------------------------
+                # إجمالي الأصوات
+                # -------------------------------------------------
+
+                total_votes = sum(
+                    int(
+                        option.get(
+                            "votes",
+                            0
+                        ) or 0
+                    )
+                    for option in normalized_options
+                )
 
                 poll["total_votes"] = total_votes
 
+                # -------------------------------------------------
                 # هل المستخدم الحالي صوّت؟
+                # -------------------------------------------------
+
                 poll["has_voted"] = False
 
                 if current_user.is_authenticated:
 
                     try:
+
                         vote = mongo.db.forum_votes.find_one(
                             {
                                 "poll_id": poll_id,
@@ -498,6 +728,7 @@ def forum():
                             poll["has_voted"] = True
 
                     except Exception as e:
+
                         print(
                             "Poll vote check error:",
                             e
@@ -527,6 +758,10 @@ def forum():
         )
 
 
+# =========================================================
+# إنشاء موضوع / استطلاع
+# =========================================================
+
 @app.route(
     "/forum/create",
     methods=["POST"]
@@ -538,6 +773,7 @@ def create_topic():
         not current_user.is_admin
         and not current_user.is_moderator
     ):
+
         flash(
             "عفواً، إنشاء المواضيع مقتصر على الإدارة والمشرفين فقط.",
             "danger"
@@ -557,7 +793,6 @@ def create_topic():
         ""
     ).strip()
 
-    # بيانات الاستطلاع
     poll_question = request.form.get(
         "poll_question",
         ""
@@ -572,6 +807,7 @@ def create_topic():
     ]
 
     if not title or not content:
+
         flash(
             "يرجى كتابة عنوان الموضوع والمحتوى.",
             "danger"
@@ -591,15 +827,18 @@ def create_topic():
     }
 
     # ---------------------------------------------------------
-    # إنشاء الاستطلاع إذا تم إدخال السؤال وخيارين على الأقل
+    # إنشاء الاستطلاع
     # ---------------------------------------------------------
+
     if (
         poll_question
         and len(poll_options) >= 2
     ):
 
+        poll_id = ObjectId()
+
         topic_data["poll"] = {
-            "_id": ObjectId(),
+            "_id": poll_id,
             "question": poll_question,
             "options": [
                 {
@@ -608,6 +847,7 @@ def create_topic():
                 }
                 for option in poll_options
             ],
+            "total_votes": 0,
             "created_at": datetime.utcnow()
         }
 
@@ -625,6 +865,10 @@ def create_topic():
     )
 
 
+# =========================================================
+# إضافة تعليق
+# =========================================================
+
 @app.route(
     "/forum/comment/<string:topic_id>",
     methods=["POST"]
@@ -638,6 +882,7 @@ def add_comment(topic_id):
     ).strip()
 
     if not content:
+
         flash(
             "يرجى كتابة تعليق أولاً.",
             "danger"
@@ -648,11 +893,13 @@ def add_comment(topic_id):
         )
 
     try:
+
         topic_obj_id = ObjectId(
             topic_id
         )
 
     except Exception:
+
         flash(
             "الموضوع غير موجود أو المعرف غير صالح.",
             "danger"
@@ -669,6 +916,7 @@ def add_comment(topic_id):
     )
 
     if not topic_exists:
+
         flash(
             "الموضوع المطلوب غير موجود.",
             "danger"
@@ -699,13 +947,19 @@ def add_comment(topic_id):
     )
 
 
+# =========================================================
+# حذف موضوع
+# =========================================================
+
 @app.route(
-    "/forum/delete/<string:topic_id>"
+    "/forum/delete/<string:topic_id>",
+    methods=["GET", "POST"]
 )
 @login_required
 def delete_topic(topic_id):
 
     if not current_user.is_admin:
+
         flash(
             "غير مسموح لك بحذف المواضيع.",
             "danger"
@@ -716,11 +970,13 @@ def delete_topic(topic_id):
         )
 
     try:
+
         topic_obj_id = ObjectId(
             topic_id
         )
 
     except Exception:
+
         flash(
             "معرف الموضوع غير صالح.",
             "danger"
@@ -744,6 +1000,21 @@ def delete_topic(topic_id):
         }
     )
 
+    # حذف أصوات الاستطلاع المرتبط به إن وجدت
+    topic_votes = mongo.db.forum_votes.find(
+        {
+            "topic_id": topic_obj_id
+        }
+    )
+
+    for vote in topic_votes:
+
+        mongo.db.forum_votes.delete_one(
+            {
+                "_id": vote["_id"]
+            }
+        )
+
     flash(
         "تم حذف الموضوع وجميع تعليقاته بنجاح.",
         "warning"
@@ -754,13 +1025,19 @@ def delete_topic(topic_id):
     )
 
 
+# =========================================================
+# حذف تعليق
+# =========================================================
+
 @app.route(
-    "/forum/comment/delete/<string:comment_id>"
+    "/forum/comment/delete/<string:comment_id>",
+    methods=["GET", "POST"]
 )
 @login_required
 def delete_comment(comment_id):
 
     if not current_user.is_admin:
+
         flash(
             "غير مسموح لك بحذف التعليقات.",
             "danger"
@@ -771,11 +1048,13 @@ def delete_comment(comment_id):
         )
 
     try:
+
         comment_obj_id = ObjectId(
             comment_id
         )
 
     except Exception:
+
         flash(
             "معرف التعليق غير صالح.",
             "danger"
@@ -801,6 +1080,10 @@ def delete_comment(comment_id):
     )
 
 
+# =========================================================
+# التصويت في الاستطلاع
+# =========================================================
+
 @app.route(
     "/forum/poll/vote/<string:poll_id>",
     methods=["POST"]
@@ -809,11 +1092,13 @@ def delete_comment(comment_id):
 def vote_poll(poll_id):
 
     try:
+
         poll_obj_id = ObjectId(
             poll_id
         )
 
     except Exception:
+
         flash(
             "معرف الاستطلاع غير صالح.",
             "danger"
@@ -824,6 +1109,7 @@ def vote_poll(poll_id):
         )
 
     try:
+
         option_index = int(
             request.form.get(
                 "option_index",
@@ -832,6 +1118,7 @@ def vote_poll(poll_id):
         )
 
     except Exception:
+
         option_index = -1
 
     # البحث عن الموضوع الذي يحتوي على الاستطلاع
@@ -842,6 +1129,7 @@ def vote_poll(poll_id):
     )
 
     if not topic:
+
         flash(
             "الاستطلاع غير موجود.",
             "danger"
@@ -851,10 +1139,12 @@ def vote_poll(poll_id):
             url_for("forum")
         )
 
-    options = topic.get(
+    poll_data = topic.get(
         "poll",
         {}
-    ).get(
+    )
+
+    options = poll_data.get(
         "options",
         []
     )
@@ -863,6 +1153,7 @@ def vote_poll(poll_id):
         option_index < 0
         or option_index >= len(options)
     ):
+
         flash(
             "خيار التصويت غير صالح.",
             "danger"
@@ -877,8 +1168,9 @@ def vote_poll(poll_id):
     )
 
     # ---------------------------------------------------------
-    # منع المستخدم من التصويت أكثر من مرة
+    # منع التصويت أكثر من مرة
     # ---------------------------------------------------------
+
     existing_vote = mongo.db.forum_votes.find_one(
         {
             "poll_id": poll_obj_id,
@@ -887,6 +1179,7 @@ def vote_poll(poll_id):
     )
 
     if existing_vote:
+
         flash(
             "لقد شاركت في هذا الاستطلاع مسبقاً.",
             "info"
@@ -896,7 +1189,10 @@ def vote_poll(poll_id):
             url_for("forum")
         )
 
+    # ---------------------------------------------------------
     # تسجيل التصويت
+    # ---------------------------------------------------------
+
     mongo.db.forum_votes.insert_one(
         {
             "poll_id": poll_obj_id,
@@ -907,17 +1203,48 @@ def vote_poll(poll_id):
         }
     )
 
-    # زيادة عدد أصوات الخيار المحدد
-    mongo.db.forum_topics.update_one(
-        {
-            "_id": topic["_id"]
-        },
-        {
-            "$inc": {
-                f"poll.options.{option_index}.votes": 1
+    # ---------------------------------------------------------
+    # زيادة عدد أصوات الخيار
+    # ---------------------------------------------------------
+
+    try:
+
+        mongo.db.forum_topics.update_one(
+            {
+                "_id": topic["_id"]
+            },
+            {
+                "$inc": {
+                    f"poll.options.{option_index}.votes": 1,
+                    "poll.total_votes": 1
+                }
             }
-        }
-    )
+        )
+
+    except Exception as e:
+
+        print(
+            "Poll vote update error:",
+            e
+        )
+
+        # إذا تم تسجيل التصويت لكن حدث خطأ بالتحديث
+        # نحذف التصويت حتى يستطيع المستخدم المحاولة مجددًا
+        mongo.db.forum_votes.delete_one(
+            {
+                "poll_id": poll_obj_id,
+                "user_id": user_obj_id
+            }
+        )
+
+        flash(
+            "حدث خطأ أثناء تسجيل التصويت.",
+            "danger"
+        )
+
+        return redirect(
+            url_for("forum")
+        )
 
     flash(
         "تم تسجيل تصويتك بنجاح.",
@@ -941,39 +1268,62 @@ def register():
 
     if request.method == "POST":
 
-        username = request.form["username"]
+        username = request.form.get(
+            "username",
+            ""
+        ).strip()
 
-        password = generate_password_hash(
-            request.form["password"]
+        password_raw = request.form.get(
+            "password",
+            ""
         )
 
-        full_name = request.form["full_name"]
-        birth_date = request.form["birth_date"]
+        password = generate_password_hash(
+            password_raw
+        )
+
+        full_name = request.form.get(
+            "full_name",
+            ""
+        ).strip()
+
+        birth_date = request.form.get(
+            "birth_date",
+            ""
+        )
 
         birth_place = request.form.get(
             "birth_place",
             "السودان"
         )
 
-        age = int(
-            request.form.get(
-                "age",
-                25
-            )
-        )
+        try:
 
-        national_id = request.form[
-            "national_id"
-        ]
+            age = int(
+                request.form.get(
+                    "age",
+                    25
+                )
+            )
+
+        except Exception:
+
+            age = 25
+
+        national_id = request.form.get(
+            "national_id",
+            ""
+        ).strip()
 
         phone = request.form.get(
             "phone",
             ""
         )
 
-        branch = request.form[
-            "branch"
-        ]
+        branch = request.form.get(
+            "branch",
+            "عام"
+        )
 
         father_name = request.form.get(
             "father_name",
@@ -1087,6 +1437,7 @@ def login():
 
         user_data = None
 
+        # دخول الآدمن
         if (
             national_id == "admin"
             or national_id == "000000000"
@@ -1117,6 +1468,7 @@ def login():
                     "is_verified": True,
                     "is_leader": True,
                     "profile_pic": "default.png",
+                    "last_profile_pic_update": None,
                 }
 
                 mongo.db.users.insert_one(
@@ -1146,6 +1498,7 @@ def login():
 
             is_valid = False
 
+            # الحفاظ على طريقة دخول الآدمن القديمة
             if (
                 user_data.get("username") == "admin"
                 and (
@@ -1237,11 +1590,16 @@ def login():
 @app.route("/profile")
 @login_required
 def profile():
+
     return render_template(
         "profile.html",
         user=current_user
     )
 
+
+# =========================================================
+# تحديث الصورة الشخصية
+# =========================================================
 
 @app.route(
     "/update_profile_picture",
@@ -1334,6 +1692,10 @@ def update_profile_picture():
     )
 
 
+# =========================================================
+# تحديث الموقع الجغرافي
+# =========================================================
+
 @app.route(
     "/update_location",
     methods=["POST"]
@@ -1403,7 +1765,7 @@ def admin_dashboard():
     search_query = request.args.get(
         "q",
         ""
-    )
+    ).strip()
 
     if search_query:
 
@@ -1456,6 +1818,10 @@ def admin_dashboard():
         sliders=sliders
     )
 
+
+# =========================================================
+# إضافة مستخدم من لوحة الإدارة
+# =========================================================
 
 @app.route(
     "/admin/add_user",
@@ -1543,6 +1909,10 @@ def admin_add_user():
     )
 
 
+# =========================================================
+# ترقية الحساب الحالي إلى آدمن
+# =========================================================
+
 @app.route(
     "/make_me_admin_emergency"
 )
@@ -1573,6 +1943,10 @@ def make_me_admin_emergency():
     )
 
 
+# =========================================================
+# إضافة خبر
+# =========================================================
+
 @app.route(
     "/admin/add_news",
     methods=["POST"]
@@ -1581,6 +1955,7 @@ def make_me_admin_emergency():
 def add_news():
 
     if not current_user.is_admin:
+
         return redirect(
             url_for("profile")
         )
@@ -1629,6 +2004,10 @@ def add_news():
     )
 
 
+# =========================================================
+# حذف خبر
+# =========================================================
+
 @app.route(
     "/admin/delete_news/<string:news_id>"
 )
@@ -1636,13 +2015,31 @@ def add_news():
 def delete_news(news_id):
 
     if not current_user.is_admin:
+
         return redirect(
             url_for("profile")
         )
 
+    try:
+
+        news_obj_id = ObjectId(
+            news_id
+        )
+
+    except Exception:
+
+        flash(
+            "معرف الخبر غير صالح.",
+            "danger"
+        )
+
+        return redirect(
+            url_for("admin_dashboard")
+        )
+
     mongo.db.news.delete_one(
         {
-            "_id": ObjectId(news_id)
+            "_id": news_obj_id
         }
     )
 
@@ -1656,6 +2053,10 @@ def delete_news(news_id):
     )
 
 
+# =========================================================
+# إضافة سلايدر
+# =========================================================
+
 @app.route(
     "/admin/add_slider",
     methods=["POST"]
@@ -1664,6 +2065,7 @@ def delete_news(news_id):
 def add_slider():
 
     if not current_user.is_admin:
+
         return redirect(
             url_for("profile")
         )
@@ -1711,6 +2113,10 @@ def add_slider():
     )
 
 
+# =========================================================
+# حذف سلايدر
+# =========================================================
+
 @app.route(
     "/admin/delete_slider/<string:slider_id>"
 )
@@ -1718,15 +2124,31 @@ def add_slider():
 def delete_slider(slider_id):
 
     if not current_user.is_admin:
+
         return redirect(
             url_for("profile")
         )
 
+    try:
+
+        slider_obj_id = ObjectId(
+            slider_id
+        )
+
+    except Exception:
+
+        flash(
+            "معرف السلايدر غير صالح.",
+            "danger"
+        )
+
+        return redirect(
+            url_for("admin_dashboard")
+        )
+
     mongo.db.sliders.delete_one(
         {
-            "_id": ObjectId(
-                slider_id
-            )
+            "_id": slider_obj_id
         }
     )
 
@@ -1740,6 +2162,10 @@ def delete_slider(slider_id):
     )
 
 
+# =========================================================
+# التحقق من المستخدم
+# =========================================================
+
 @app.route(
     "/admin/verify/<string:user_id>"
 )
@@ -1750,15 +2176,32 @@ def verify_user(user_id):
         not current_user.is_admin
         and not current_user.is_moderator
     ):
+
         return redirect(
             url_for("profile")
         )
 
+    try:
+
+        user_obj_id = ObjectId(
+            user_id
+        )
+
+    except Exception:
+
+        flash(
+            "معرف المستخدم غير صالح.",
+            "danger"
+        )
+
+        return redirect(
+            request.referrer
+            or url_for("admin_dashboard")
+        )
+
     mongo.db.users.update_one(
         {
-            "_id": ObjectId(
-                user_id
-            )
+            "_id": user_obj_id
         },
         {
             "$set": {
@@ -1774,8 +2217,13 @@ def verify_user(user_id):
 
     return redirect(
         request.referrer
+        or url_for("admin_dashboard")
     )
 
+
+# =========================================================
+# رفض / إرجاع طلب المستخدم
+# =========================================================
 
 @app.route(
     "/admin/reject/<string:user_id>"
@@ -1787,15 +2235,32 @@ def reject_user(user_id):
         not current_user.is_admin
         and not current_user.is_moderator
     ):
+
         return redirect(
             url_for("profile")
         )
 
+    try:
+
+        user_obj_id = ObjectId(
+            user_id
+        )
+
+    except Exception:
+
+        flash(
+            "معرف المستخدم غير صالح.",
+            "danger"
+        )
+
+        return redirect(
+            request.referrer
+            or url_for("admin_dashboard")
+        )
+
     mongo.db.users.update_one(
         {
-            "_id": ObjectId(
-                user_id
-            )
+            "_id": user_obj_id
         },
         {
             "$set": {
@@ -1811,25 +2276,106 @@ def reject_user(user_id):
 
     return redirect(
         request.referrer
+        or url_for("admin_dashboard")
     )
 
 
+# =========================================================
+# حذف المستخدم
+# =========================================================
+#
+# مهم:
+# اسم الدالة هنا هو delete_user
+# لأن admin_dashboard.html يستخدم:
+#
+# url_for('delete_user', user_id=u._id)
+#
+# =========================================================
+
 @app.route(
-    "/admin/delete/<string:user_id>"
+    "/admin/delete/<string:user_id>",
+    methods=["GET", "POST"]
 )
 @login_required
-def delete_user_route(user_id):
+def delete_user(user_id):
 
     if not current_user.is_admin:
+
         return redirect(
             url_for("profile")
         )
 
+    try:
+
+        user_obj_id = ObjectId(
+            user_id
+        )
+
+    except Exception:
+
+        flash(
+            "معرف المستخدم غير صالح.",
+            "danger"
+        )
+
+        return redirect(
+            url_for("admin_dashboard")
+        )
+
+    # منع حذف الحساب الإداري الحالي
+    if str(current_user.id) == str(user_obj_id):
+
+        flash(
+            "لا يمكنك حذف حسابك الإداري الحالي.",
+            "warning"
+        )
+
+        return redirect(
+            url_for("admin_dashboard")
+        )
+
+    target_user = mongo.db.users.find_one(
+        {
+            "_id": user_obj_id
+        }
+    )
+
+    if not target_user:
+
+        flash(
+            "المستخدم غير موجود.",
+            "warning"
+        )
+
+        return redirect(
+            url_for("admin_dashboard")
+        )
+
+    # حذف المستخدم
     mongo.db.users.delete_one(
         {
-            "_id": ObjectId(
-                user_id
-            )
+            "_id": user_obj_id
+        }
+    )
+
+    # حذف مواضيعه في المنتدى
+    mongo.db.forum_topics.delete_many(
+        {
+            "user_id": user_obj_id
+        }
+    )
+
+    # حذف تعليقاته
+    mongo.db.forum_comments.delete_many(
+        {
+            "user_id": user_obj_id
+        }
+    )
+
+    # حذف أصواته
+    mongo.db.forum_votes.delete_many(
+        {
+            "user_id": user_obj_id
         }
     )
 
@@ -1843,6 +2389,10 @@ def delete_user_route(user_id):
     )
 
 
+# =========================================================
+# تغيير كلمة المرور
+# =========================================================
+
 @app.route(
     "/admin/change_password/<string:user_id>",
     methods=["POST"]
@@ -1851,8 +2401,26 @@ def delete_user_route(user_id):
 def change_password(user_id):
 
     if not current_user.is_admin:
+
         return redirect(
             url_for("profile")
+        )
+
+    try:
+
+        user_obj_id = ObjectId(
+            user_id
+        )
+
+    except Exception:
+
+        flash(
+            "معرف المستخدم غير صالح.",
+            "danger"
+        )
+
+        return redirect(
+            url_for("admin_dashboard")
         )
 
     new_pass = request.form.get(
@@ -1867,9 +2435,7 @@ def change_password(user_id):
 
         mongo.db.users.update_one(
             {
-                "_id": ObjectId(
-                    user_id
-                )
+                "_id": user_obj_id
             },
             {
                 "$set": {
@@ -1888,6 +2454,10 @@ def change_password(user_id):
     )
 
 
+# =========================================================
+# تغيير الصلاحية واللقب
+# =========================================================
+
 @app.route(
     "/admin/set_role_and_title/<string:user_id>",
     methods=["POST"]
@@ -1896,8 +2466,26 @@ def change_password(user_id):
 def set_role_and_title(user_id):
 
     if not current_user.is_admin:
+
         return redirect(
             url_for("profile")
+        )
+
+    try:
+
+        user_obj_id = ObjectId(
+            user_id
+        )
+
+    except Exception:
+
+        flash(
+            "معرف المستخدم غير صالح.",
+            "danger"
+        )
+
+        return redirect(
+            url_for("admin_dashboard")
         )
 
     role = request.form.get(
@@ -1920,9 +2508,7 @@ def set_role_and_title(user_id):
 
     mongo.db.users.update_one(
         {
-            "_id": ObjectId(
-                user_id
-            )
+            "_id": user_obj_id
         },
         {
             "$set": {
@@ -2064,3 +2650,4 @@ if __name__ == "__main__":
         port=port,
         debug=True
     )
+
