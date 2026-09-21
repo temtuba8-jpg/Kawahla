@@ -22,7 +22,7 @@ app.config["MONGO_URI"] = (
     "mongodb+srv://kawahla:Fad%400911923356@cluster0.outspyb.mongodb.net/kawahla_db?retryWrites=true&w=majority&appName=Cluster0&tls=true&tlsAllowInvalidCertificates=true"
 )
 
-IMGBB_API_KEY = "85c7ff6f1e72c472683b7ac998a05e38"
+IMGBB_API_KEY = "cc5590cadcc0d03fc63bbb5317442839"
 
 mongo = PyMongo(app)
 login_manager = LoginManager()
