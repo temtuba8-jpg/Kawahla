@@ -48,7 +48,6 @@ def upload_to_imgbb(file_storage):
 
 
 class User(UserMixin):
-
     def __init__(self, user_data):
         if user_data:
             self.id = str(user_data.get("_id"))
@@ -327,10 +326,8 @@ def update_location():
 @login_required
 def admin_dashboard():
     if not current_user.is_admin and current_user.username != "admin":
-        mongo.db.users.update_one(
-            {"_id": ObjectId(current_user.id)},
-            {"$set": {"role": "admin", "is_verified": True}}
-        )
+        flash("عفواً، ليس لديك صلاحية للوصول إلى لوحة التحكم.", "danger")
+        return redirect(url_for("profile"))
 
     search_query = request.args.get("q", "")
     if search_query:
@@ -357,6 +354,10 @@ def admin_dashboard():
 @app.route("/admin/add_user", methods=["POST"])
 @login_required
 def admin_add_user():
+    if not current_user.is_admin:
+        flash("غير مسموح لك بهذا الإجراء", "danger")
+        return redirect(url_for("profile"))
+        
     username = request.form.get("username")
     password = request.form.get("password")
     full_name = request.form.get("full_name")
@@ -395,6 +396,9 @@ def make_me_admin_emergency():
 @app.route("/admin/add_news", methods=["POST"])
 @login_required
 def add_news():
+    if not current_user.is_admin:
+        return redirect(url_for("profile"))
+        
     title = request.form["title"]
     content = request.form["content"]
     date = request.form["date"]
@@ -415,6 +419,9 @@ def add_news():
 @app.route("/admin/delete_news/<string:news_id>")
 @login_required
 def delete_news(news_id):
+    if not current_user.is_admin:
+        return redirect(url_for("profile"))
+        
     mongo.db.news.delete_one({"_id": ObjectId(news_id)})
     flash("تم حذف الخبر بنجاح", "warning")
     return redirect(url_for("admin_dashboard"))
@@ -423,6 +430,9 @@ def delete_news(news_id):
 @app.route("/admin/add_slider", methods=["POST"])
 @login_required
 def add_slider():
+    if not current_user.is_admin:
+        return redirect(url_for("profile"))
+        
     title = request.form.get("title", "")
     description = request.form.get("description", "")
 
@@ -443,6 +453,9 @@ def add_slider():
 @app.route("/admin/delete_slider/<string:slider_id>")
 @login_required
 def delete_slider(slider_id):
+    if not current_user.is_admin:
+        return redirect(url_for("profile"))
+        
     mongo.db.sliders.delete_one({"_id": ObjectId(slider_id)})
     flash("تم حذف صورة السلايدر بنجاح", "warning")
     return redirect(url_for("admin_dashboard"))
@@ -451,6 +464,9 @@ def delete_slider(slider_id):
 @app.route("/admin/verify/<string:user_id>")
 @login_required
 def verify_user(user_id):
+    if not current_user.is_admin:
+        return redirect(url_for("profile"))
+        
     mongo.db.users.update_one(
         {"_id": ObjectId(user_id)}, {"$set": {"is_verified": True}}
     )
@@ -461,6 +477,9 @@ def verify_user(user_id):
 @app.route("/admin/reject/<string:user_id>")
 @login_required
 def reject_user(user_id):
+    if not current_user.is_admin:
+        return redirect(url_for("profile"))
+        
     mongo.db.users.update_one(
         {"_id": ObjectId(user_id)}, {"$set": {"is_verified": False}}
     )
@@ -471,6 +490,9 @@ def reject_user(user_id):
 @app.route("/admin/delete/<string:user_id>")
 @login_required
 def delete_user(user_id):
+    if not current_user.is_admin:
+        return redirect(url_for("profile"))
+        
     mongo.db.users.delete_one({"_id": ObjectId(user_id)})
     flash("تم حذف المستخدم نهائياً", "danger")
     return redirect(url_for("admin_dashboard"))
@@ -479,6 +501,9 @@ def delete_user(user_id):
 @app.route("/admin/change_password/<string:user_id>", methods=["POST"])
 @login_required
 def change_password(user_id):
+    if not current_user.is_admin:
+        return redirect(url_for("profile"))
+        
     new_pass = request.form.get("new_password")
     if new_pass:
         hashed = generate_password_hash(new_pass)
@@ -492,6 +517,9 @@ def change_password(user_id):
 @app.route("/admin/set_role_and_title/<string:user_id>", methods=["POST"])
 @login_required
 def set_role_and_title(user_id):
+    if not current_user.is_admin:
+        return redirect(url_for("profile"))
+        
     role = request.form.get("role", "user")
     title_type = request.form.get("title_type", "عضو")
     is_leader = title_type in [
