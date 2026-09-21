@@ -279,6 +279,7 @@ def login():
         flash("اسم المستخدم أو كلمة المرور غير صحيحة", "danger")
     return render_template("login.html")
 
+
 @app.route("/profile")
 @login_required
 def profile():
