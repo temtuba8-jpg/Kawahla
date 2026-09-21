@@ -57,7 +57,7 @@
                     <tbody>
                         {% for u in users %}
                         <tr>
-                            <td><img src="{{ url_for('static', filename='uploads/' + u.profile_pic) }}" class="rounded-circle border border-danger" width="45" height="45" style="object-fit: cover;"></td>
+                            <td><img src="{{ url_for('static', filename='uploads/' + u.profile_pic) }}" class="rounded-circle border border-danger" width="45" height="45" style="object-fit: cover;" onerror="this.src='{{ u.profile_pic if u.profile_pic and u.profile_pic.startswith('http') else url_for('static', filename='default.png') }}';"></td>
                             <td class="fw-bold">{{ u.full_name }}</td>
                             <td><code>{{ u.username }}</code></td>
                             <td><span class="badge bg-secondary">{{ u.branch }}</span></td>
@@ -79,19 +79,19 @@
                             <td>
                                 <div class="d-flex gap-1 flex-wrap mb-2">
                                     {% if not u.is_verified %}
-                                        <a href="{{ url_for('verify_user', user_id=u.id) }}" class="btn btn-sm btn-success" title="توثيق"><i class="fas fa-check"></i></a>
+                                        <a href="{{ url_for('verify_user', user_id=u._id) }}" class="btn btn-sm btn-success" title="توثيق"><i class="fas fa-check"></i></a>
                                     {% else %}
-                                        <a href="{{ url_for('reject_user', user_id=u.id) }}" class="btn btn-sm btn-warning" title="إلغاء التوثيق للتعديل"><i class="fas fa-undo"></i></a>
+                                        <a href="{{ url_for('reject_user', user_id=u._id) }}" class="btn btn-sm btn-warning" title="إلغاء التوثيق للتعديل"><i class="fas fa-undo"></i></a>
                                     {% endif %}
-                                    <a href="{{ url_for('delete_user', user_id=u.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('هل أنت متأكد من حذف هذا المستخدم نهائياً؟')" title="حذف اليوزر"><i class="fas fa-trash"></i></a>
+                                    <a href="{{ url_for('delete_user', user_id=u._id) }}" class="btn btn-sm btn-danger" onclick="return confirm('هل أنت متأكد من حذف هذا المستخدم نهائياً؟')" title="حذف اليوزر"><i class="fas fa-trash"></i></a>
                                 </div>
 
-                                <form action="{{ url_for('change_password', user_id=u.id) }}" method="POST" class="mb-2 d-flex gap-1">
+                                <form action="{{ url_for('change_password', user_id=u._id) }}" method="POST" class="mb-2 d-flex gap-1">
                                     <input type="password" name="new_password" placeholder="كلمة سر جديدة" class="form-control form-control-sm" required style="width: 120px;">
                                     <button type="submit" class="btn btn-sm btn-outline-dark" title="تغيير كلمة المرور"><i class="fas fa-key"></i></button>
                                 </form>
 
-                                <form action="{{ url_for('set_role_and_title', user_id=u.id) }}" method="POST">
+                                <form action="{{ url_for('set_role_and_title', user_id=u._id) }}" method="POST">
                                     <select name="role" class="form-select form-select-sm mb-1">
                                         <option value="user" {% if u.role == 'user' %}selected{% endif %}>مستخدم عادي</option>
                                         <option value="moderator" {% if u.role == 'moderator' %}selected{% endif %}>مشرف توثيق</option>
@@ -238,7 +238,8 @@
                                 <h6 class="fw-bold text-danger mb-1">{{ n.title }}</h6>
                                 <small class="text-muted"><i class="fas fa-calendar-alt text-gold me-1"></i> {{ n.date }}</small>
                             </div>
-                            <a href="{{ url_for('delete_news', news_id=n.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('هل أنت متأكد من حذف هذا الخبر؟')"><i class="fas fa-trash"></i></a>
+                            <!-- تم تعديل n.id إلى n._id هنا لضمان عمل الرابط بشكل صحيح -->
+                            <a href="{{ url_for('delete_news', news_id=n._id) }}" class="btn btn-sm btn-danger" onclick="return confirm('هل أنت متأكد من حذف هذا الخبر؟')"><i class="fas fa-trash"></i></a>
                         </div>
                         {% else %}
                         <div class="alert alert-light border text-center text-muted">لا توجد أخبار منشورة حالياً.</div>
@@ -277,10 +278,11 @@
                         {% for s in sliders %}
                         <div class="col-md-6 mb-3">
                             <div class="card shadow-sm border border-warning">
-                                <img src="{{ url_for('static', filename='uploads/' + s.image) }}" class="card-img-top" style="height: 130px; object-fit: cover;">
+                                <img src="{{ url_for('static', filename='uploads/' + s.image) }}" class="card-img-top" style="height: 130px; object-fit: cover;" onerror="this.src='{{ s.image if s.image and s.image.startswith('http') else url_for('static', filename='default.png') }}';">
                                 <div class="card-body p-2 text-center">
                                     <h6 class="fw-bold small text-danger mb-1">{{ s.title or 'بدون عنوان' }}</h6>
-                                    <a href="{{ url_for('delete_slider', slider_id=s.id) }}" class="btn btn-sm btn-danger w-100 mt-1" onclick="return confirm('حذف هذه الصورة من السلايدر؟')"><i class="fas fa-trash"></i> حذف الصورة</a>
+                                    <!-- تم تعديل s.id إلى s._id هنا أيضاً -->
+                                    <a href="{{ url_for('delete_slider', slider_id=s._id) }}" class="btn btn-sm btn-danger w-100 mt-1" onclick="return confirm('حذف هذه الصورة من السلايدر؟')"><i class="fas fa-trash"></i> حذف الصورة</a>
                                 </div>
                             </div>
                         </div>
