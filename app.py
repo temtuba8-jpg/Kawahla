@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 from bson.objectid import ObjectId
 from flask import Flask, flash, jsonify, redirect, render_template, request, url_for
@@ -30,15 +30,28 @@ login_manager.init_app(app)
 login_manager.login_view = "login"
 
 
-def upload_to_imgbb(file_storage):
-    if not file_storage or file_storage.filename == "":
+def upload_to_imgbb(image_input):
+    if not image_input:
         return None
     try:
-        file_bytes = file_storage.read()
         url = "https://api.imgbb.com/1/upload"
         payload = {"key": IMGBB_API_KEY}
-        files = {"image": (file_storage.filename, file_bytes)}
-        response = requests.post(url, data=payload, files=files)
+
+        # دعم رفع ملف من الجهاز (FileStorage) أو سلسلة Base64 من الكاميرا
+        if hasattr(image_input, "read"):
+            file_bytes = image_input.read()
+            if not image_input.filename:
+                return None
+            files = {"image": (image_input.filename, file_bytes)}
+            response = requests.post(url, data=payload, files=files)
+        elif isinstance(image_input, str):
+            if image_input.startswith("data:image"):
+                image_input = image_input.split(",")[1]
+            payload["image"] = image_input
+            response = requests.post(url, data=payload)
+        else:
+            return None
+
         result = response.json()
         if result.get("success"):
             return result["data"]["url"]
@@ -72,6 +85,9 @@ class User(UserMixin):
             self.role = user_data.get("role", "user")
             self.title_type = user_data.get("title_type", "عضو")
             self.is_leader = user_data.get("is_leader", False)
+            self.last_profile_pic_update = user_data.get(
+                "last_profile_pic_update"
+            )
 
     @property
     def is_admin(self):
@@ -234,6 +250,7 @@ def register():
             "role": "user",
             "title_type": "عضو",
             "is_leader": False,
+            "last_profile_pic_update": None,
         }
         mongo.db.users.insert_one(new_user_data)
         flash(
@@ -247,39 +264,52 @@ def register():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        username = request.form.get("username", "").strip()
+        national_id = request.form.get("national_id", "").strip()
         password = request.form.get("password", "").strip()
 
-        user_data = mongo.db.users.find_one({"username": username})
-        
-        if username == "admin" and not user_data:
-            admin_user = {
-                "username": "admin",
-                "password": generate_password_hash("admin123"),
-                "full_name": "الآدمن العام",
-                "birth_date": "1980-01-01",
-                "age": 46,
-                "national_id": "000000000",
-                "phone": "0000000000",
-                "branch": "الإدارة",
-                "role": "admin",
-                "title_type": "آدمن الموقع",
-                "is_verified": True,
-                "is_leader": True,
-                "profile_pic": "https://i.ibb.co/default.png",
-            }
-            mongo.db.users.insert_one(admin_user)
+        # الاستعلام باستخدام الرقم الوطني، مع دعم حساب الآدمن عبر اسم المستخدم أو الرقم الوطني الافتراضي
+        user_data = None
+        if national_id == "admin" or national_id == "000000000":
             user_data = mongo.db.users.find_one({"username": "admin"})
+            if not user_data:
+                admin_user = {
+                    "username": "admin",
+                    "password": generate_password_hash("admin123"),
+                    "full_name": "الآدمن العام",
+                    "birth_date": "1980-01-01",
+                    "age": 46,
+                    "national_id": "000000000",
+                    "phone": "0000000000",
+                    "branch": "الإدارة",
+                    "role": "admin",
+                    "title_type": "آدمن الموقع",
+                    "is_verified": True,
+                    "is_leader": True,
+                    "profile_pic": "https://i.ibb.co/default.png",
+                }
+                mongo.db.users.insert_one(admin_user)
+                user_data = mongo.db.users.find_one({"username": "admin"})
+        else:
+            user_data = mongo.db.users.find_one({"national_id": national_id})
 
         if user_data:
             stored_pass = user_data.get("password", "")
             is_valid = False
 
-            if username == "admin" and (password == "admin123" or stored_pass == "admin123"):
+            if (
+                user_data.get("username") == "admin"
+                and (password == "admin123" or stored_pass == "admin123")
+            ):
                 is_valid = True
                 mongo.db.users.update_one(
                     {"username": "admin"},
-                    {"$set": {"password": generate_password_hash("admin123"), "role": "admin", "is_verified": True}}
+                    {
+                        "$set": {
+                            "password": generate_password_hash("admin123"),
+                            "role": "admin",
+                            "is_verified": True,
+                        }
+                    },
                 )
             else:
                 try:
@@ -292,14 +322,14 @@ def login():
             if is_valid:
                 user_obj = User(user_data)
                 login_user(user_obj)
-                if user_obj.role == "admin" or username == "admin":
+                if user_obj.role == "admin" or user_obj.username == "admin":
                     return redirect(url_for("admin_dashboard"))
                 elif user_obj.role == "moderator":
                     return redirect(url_for("moderator_dashboard"))
                 else:
                     return redirect(url_for("profile"))
 
-        flash("اسم المستخدم أو كلمة المرور غير صحيحة", "danger")
+        flash("الرقم الوطني أو كلمة المرور غير صحيحة", "danger")
     return render_template("login.html")
 
 
@@ -307,6 +337,48 @@ def login():
 @login_required
 def profile():
     return render_template("profile.html", user=current_user)
+
+
+@app.route("/update_profile_pic", methods=["POST"])
+@login_required
+def update_profile_pic():
+    user_doc = mongo.db.users.find_one({"_id": ObjectId(current_user.id)})
+    last_update = user_doc.get("last_profile_pic_update")
+
+    # التحقق من مرور شهر (30 يوماً) على آخر تحديث للصورة الشخصية
+    if last_update:
+        if datetime.utcnow() - last_update < timedelta(days=30):
+            flash(
+                "عفواً، لا يمكنك تغيير الصورة الشخصية إلا مرة واحدة كل شهر.",
+                "danger",
+            )
+            return redirect(url_for("profile"))
+
+    # استقبال الصورة إما كملف محمل من الجهاز أو كبيانات Base64 من الكاميرا
+    profile_pic_file = request.files.get("profile_pic")
+    profile_pic_base64 = request.form.get("profile_pic_base64")
+
+    image_input = profile_pic_file if profile_pic_file else profile_pic_base64
+    uploaded_url = upload_to_imgbb(image_input)
+
+    if uploaded_url:
+        mongo.db.users.update_one(
+            {"_id": ObjectId(current_user.id)},
+            {
+                "$set": {
+                    "profile_pic": uploaded_url,
+                    "last_profile_pic_update": datetime.utcnow(),
+                }
+            },
+        )
+        flash("تم تحديث الصورة الشخصية بنجاح", "success")
+    else:
+        flash(
+            "فشل رفع الصورة، يرجى التأكد من اختيار صورة أو فتح الكاميرا بشكل صحيح",
+            "danger",
+        )
+
+    return redirect(url_for("profile"))
 
 
 @app.route("/update_location", methods=["POST"])
@@ -334,6 +406,7 @@ def admin_dashboard():
         users_cursor = mongo.db.users.find({
             "$or": [
                 {"full_name": {"$regex": search_query, "$options": "i"}},
+                {"national_id": {"$regex": search_query, "$options": "i"}},
                 {"username": {"$regex": search_query, "$options": "i"}},
             ]
         })
@@ -357,28 +430,31 @@ def admin_add_user():
     if not current_user.is_admin:
         flash("غير مسموح لك بهذا الإجراء", "danger")
         return redirect(url_for("profile"))
-        
+
     username = request.form.get("username")
     password = request.form.get("password")
     full_name = request.form.get("full_name")
+    national_id = request.form.get("national_id", "")
     branch = request.form.get("branch", "عام")
     role = request.form.get("role", "user")
-    
+
     if username and password and full_name:
         hashed_pass = generate_password_hash(password)
         mongo.db.users.insert_one({
             "username": username,
             "password": hashed_pass,
             "full_name": full_name,
+            "national_id": national_id,
             "branch": branch,
             "role": role,
             "is_verified": True,
-            "profile_pic": "https://i.ibb.co/default.png"
+            "profile_pic": "https://i.ibb.co/default.png",
+            "last_profile_pic_update": None,
         })
         flash("تم إضافة المستخدم بنجاح بواسطة الآدمن", "success")
     else:
         flash("يرجى ملء الحقول المطلوبة لإضافة المستخدم", "danger")
-        
+
     return redirect(url_for("admin_dashboard"))
 
 
@@ -398,7 +474,7 @@ def make_me_admin_emergency():
 def add_news():
     if not current_user.is_admin:
         return redirect(url_for("profile"))
-        
+
     title = request.form["title"]
     content = request.form["content"]
     date = request.form["date"]
@@ -421,7 +497,7 @@ def add_news():
 def delete_news(news_id):
     if not current_user.is_admin:
         return redirect(url_for("profile"))
-        
+
     mongo.db.news.delete_one({"_id": ObjectId(news_id)})
     flash("تم حذف الخبر بنجاح", "warning")
     return redirect(url_for("admin_dashboard"))
@@ -432,7 +508,7 @@ def delete_news(news_id):
 def add_slider():
     if not current_user.is_admin:
         return redirect(url_for("profile"))
-        
+
     title = request.form.get("title", "")
     description = request.form.get("description", "")
 
@@ -455,7 +531,7 @@ def add_slider():
 def delete_slider(slider_id):
     if not current_user.is_admin:
         return redirect(url_for("profile"))
-        
+
     mongo.db.sliders.delete_one({"_id": ObjectId(slider_id)})
     flash("تم حذف صورة السلايدر بنجاح", "warning")
     return redirect(url_for("admin_dashboard"))
@@ -466,7 +542,7 @@ def delete_slider(slider_id):
 def verify_user(user_id):
     if not current_user.is_admin:
         return redirect(url_for("profile"))
-        
+
     mongo.db.users.update_one(
         {"_id": ObjectId(user_id)}, {"$set": {"is_verified": True}}
     )
@@ -479,7 +555,7 @@ def verify_user(user_id):
 def reject_user(user_id):
     if not current_user.is_admin:
         return redirect(url_for("profile"))
-        
+
     mongo.db.users.update_one(
         {"_id": ObjectId(user_id)}, {"$set": {"is_verified": False}}
     )
@@ -492,7 +568,7 @@ def reject_user(user_id):
 def delete_user(user_id):
     if not current_user.is_admin:
         return redirect(url_for("profile"))
-        
+
     mongo.db.users.delete_one({"_id": ObjectId(user_id)})
     flash("تم حذف المستخدم نهائياً", "danger")
     return redirect(url_for("admin_dashboard"))
@@ -503,7 +579,7 @@ def delete_user(user_id):
 def change_password(user_id):
     if not current_user.is_admin:
         return redirect(url_for("profile"))
-        
+
     new_pass = request.form.get("new_password")
     if new_pass:
         hashed = generate_password_hash(new_pass)
@@ -519,7 +595,7 @@ def change_password(user_id):
 def set_role_and_title(user_id):
     if not current_user.is_admin:
         return redirect(url_for("profile"))
-        
+
     role = request.form.get("role", "user")
     title_type = request.form.get("title_type", "عضو")
     is_leader = title_type in [
@@ -578,6 +654,7 @@ if __name__ == "__main__":
                 "is_verified": True,
                 "is_leader": True,
                 "profile_pic": "https://i.ibb.co/default.png",
+                "last_profile_pic_update": None,
             }
             mongo.db.users.insert_one(admin_user)
         else:
