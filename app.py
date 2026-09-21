@@ -129,7 +129,6 @@ def index():
     )
 
 
-# تم إضافة دالة عرض جميع الأخبار لتفادي خطأ BuildError في القالب الرئيسي
 @app.route("/news")
 def all_news():
     news_list = list(mongo.db.news.find().sort("_id", -1))
