@@ -1,4 +1,3 @@
-```html
 {% extends "base.html" %}
 {% block content %}
 <div class="row justify-content-center">
@@ -10,11 +9,11 @@
             </h2>
 
             {% if current_user.is_authenticated and current_user.is_admin %}
-                <!-- زر لإضافة منشور جديد إذا كان المستخدم أدمن -->
-                <button class="btn btn-danger fw-bold"
+                <!-- زر لإضافة منشور أو استطلاع جديد إذا كان المستخدم أدمن -->
+                <button class="btn btn-danger fw-bold shadow-sm"
                         data-bs-toggle="modal"
                         data-bs-target="#newTopicModal">
-                    <i class="fas fa-plus-circle"></i> إضافة موضوع جديد
+                    <i class="fas fa-plus-circle"></i> إضافة موضوع / استطلاع جديد
                 </button>
             {% endif %}
         </div>
@@ -31,10 +30,21 @@
                             <i class="fas fa-bullhorn"></i> {{ topic.title }}
                         </h5>
 
-                        <small style="font-size: 11px;">
-                            بواسطة:
-                            {{ topic.author.full_name if topic.author else 'الإدارة' }}
-                        </small>
+                        <div class="d-flex align-items-center gap-2">
+                            <small style="font-size: 11px;">
+                                بواسطة: {{ topic.author.full_name if topic.author else 'الإدارة' }}
+                            </small>
+
+                            <!-- زر حذف الموضوع (للأدمن فقط) -->
+                            {% if current_user.is_authenticated and current_user.is_admin %}
+                                <a href="{{ url_for('delete_topic', topic_id=topic['_id']) }}"
+                                   class="btn btn-sm btn-outline-light py-0 px-2"
+                                   onclick="return confirm('هل أنت متأكد من حذف هذا الموضوع نهائياً؟');"
+                                   title="حذف الموضوع">
+                                    <i class="fas fa-trash-alt"></i>
+                                </a>
+                            {% endif %}
+                        </div>
                     </div>
 
                     <div class="card-body bg-light">
@@ -43,6 +53,56 @@
                         <p class="card-text fs-6" style="white-space: pre-line;">
                             {{ topic.content }}
                         </p>
+
+                        <!-- قسم استطلاع الرأي (إن وجد) -->
+                        {% if topic.poll %}
+                            <div class="card my-3 border-warning bg-white shadow-sm rounded-3">
+                                <div class="card-body">
+                                    <h6 class="text-dark fw-bold mb-3">
+                                        <i class="fas fa-poll text-danger"></i> 
+                                        استطلاع رأي: {{ topic.poll.question }}
+                                    </h6>
+
+                                    {% if current_user.is_authenticated %}
+                                        {% if topic.poll.has_voted %}
+                                            <!-- عرض النتائج إذا سبق للمستخدم التصويت -->
+                                            <div class="alert alert-light border small py-2 mb-2 text-success fw-bold">
+                                                <i class="fas fa-check-circle"></i> شكراً لك، لقد شاركت في هذا الاستطلاع مسبقاً. إليك النتائج:
+                                            </div>
+                                            {% for opt in topic.poll.options %}
+                                                {% set percentage = (opt.votes / topic.poll.total_votes * 100) if topic.poll.total_votes > 0 else 0 %}
+                                                <div class="mb-2">
+                                                    <div class="d-flex justify-content-between small fw-bold mb-1">
+                                                        <span>{{ opt.text }}</span>
+                                                        <span>{{ opt.votes }} صوت ({{ percentage | round(1) }}%)</span>
+                                                    </div>
+                                                    <div class="progress" style="height: 10px;">
+                                                        <div class="progress-bar bg-danger" role="progressbar" style="width: {{ percentage }}%;"></div>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                            <small class="text-muted d-block mt-2 text-center">إجمالي الأصوات: {{ topic.poll.total_votes }}</small>
+                                        
+                                        {% else %}
+                                            <!-- نموذج التصويت للمستخدم الذي لم يصوت بعد -->
+                                            <form action="{{ url_for('vote_poll', poll_id=topic.poll['_id']) }}" method="POST">
+                                                <div class="list-group mb-3">
+                                                    {% for opt in topic.poll.options %}
+                                                        <label class="list-group-item list-group-item-action d-flex align-items-center py-2" style="cursor: pointer;">
+                                                            <input class="form-check-input me-3 mt-0" type="radio" name="option_index" value="{{ loop.index0 }}" required>
+                                                            <span>{{ opt.text }}</span>
+                                                        </label>
+                                                    {% endfor %}
+                                                </div>
+                                                <button type="submit" class="btn btn-sm btn-danger fw-bold px-4">
+                                                    <i class="fas fa-vote-yea"></i> إرسال التصويت
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
 
                         <hr>
 
@@ -59,25 +119,32 @@
 
                                 {% for comment in topic.comments %}
 
-                                    <div class="p-2 mb-2 bg-white border rounded shadow-sm text-start">
+                                    <div class="p-2 mb-2 bg-white border rounded shadow-sm text-start position-relative">
 
-                                        <div class="d-flex justify-content-between">
-
-                                            <span class="fw-bold text-dark"
-                                                  style="font-size: 12px;">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="fw-bold text-dark" style="font-size: 12px;">
                                                 {{ comment.author.full_name if comment.author else 'عضو الكاهلي' }}
                                             </span>
 
-                                            <small class="text-muted"
-                                                   style="font-size: 10px;">
-                                                {{ comment.created_at.strftime('%Y-%m-%d %H:%M')
-                                                   if comment.created_at else '' }}
-                                            </small>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <small class="text-muted" style="font-size: 10px;">
+                                                    {{ comment.created_at.strftime('%Y-%m-%d %H:%M') if comment.created_at else '' }}
+                                                </small>
 
+                                                <!-- زر حذف التعليق (للأدمن فقط) -->
+                                                {% if current_user.is_authenticated and current_user.is_admin %}
+                                                    <a href="{{ url_for('delete_comment', comment_id=comment['_id']) }}"
+                                                       class="text-danger"
+                                                       onclick="return confirm('حذف هذا التعليق؟');"
+                                                       title="حذف التعليق"
+                                                       style="font-size: 11px;">
+                                                        <i class="fas fa-times-circle"></i>
+                                                    </a>
+                                                {% endif %}
+                                            </div>
                                         </div>
 
-                                        <p class="m-0 text-secondary mt-1"
-                                           style="font-size: 13px;">
+                                        <p class="m-0 text-secondary mt-1" style="font-size: 13px;">
                                             {{ comment.content }}
                                         </p>
 
@@ -103,19 +170,14 @@
                                   class="mt-2">
 
                                 <div class="input-group">
-
                                     <input type="text"
                                            name="content"
                                            class="form-control"
                                            placeholder="اكتب تعليقك هنا..."
                                            required>
-
-                                    <button class="btn btn-danger"
-                                            type="submit">
-                                        <i class="fas fa-paper-plane"></i>
-                                        تعليق
+                                    <button class="btn btn-danger" type="submit">
+                                        <i class="fas fa-paper-plane"></i> تعليق
                                     </button>
-
                                 </div>
 
                             </form>
@@ -123,10 +185,7 @@
                         {% else %}
 
                             <p class="text-center small text-muted">
-                                <a href="{{ url_for('login') }}">
-                                    تسجيل الدخول
-                                </a>
-                                مطلوب لتتمكن من إضافة تعليق.
+                                <a href="{{ url_for('login') }}">تسجيل الدخول</a> مطلوب لتتمكن من إضافة تعليق.
                             </p>
 
                         {% endif %}
@@ -139,8 +198,7 @@
         {% else %}
 
             <div class="alert alert-warning text-center fw-bold">
-                لا توجد مواضيع منشورة في المنتدى حالياً.
-                ترقبونا قريباً!
+                لا توجد مواضيع منشورة في المنتدى حالياً. ترقبونا قريباً!
             </div>
 
         {% endif %}
@@ -149,89 +207,84 @@
 </div>
 
 
-<!-- Modal إضافة موضوع جديد (خاص بالأدمن) -->
+<!-- Modal إضافة موضوع جديد أو استطلاع (خاص بالأدمن) -->
 {% if current_user.is_authenticated and current_user.is_admin %}
 
-<div class="modal fade"
-     id="newTopicModal"
-     tabindex="-1"
-     aria-hidden="true">
-
-    <div class="modal-dialog">
-
+<div class="modal fade" id="newTopicModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
 
-            <form action="{{ url_for('create_topic') }}"
-                  method="POST">
-
+            <form action="{{ url_for('create_topic') }}" method="POST">
                 <div class="modal-header bg-danger text-white">
-
                     <h5 class="modal-title">
-                        إنشاء موضوع جديد بالمنتدى
+                        <i class="fas fa-plus-circle"></i> إنشاء موضوع جديد أو استطلاع رأي
                     </h5>
-
-                    <button type="button"
-                            class="btn-close"
-                            data-bs-dismiss="modal"
-                            aria-label="Close">
-                    </button>
-
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
-                <div class="modal-content p-3 border-0">
+                <div class="modal-body p-4 text-start">
 
-                    <div class="mb-3 text-start">
-
-                        <label class="form-label fw-bold">
-                            عنوان الموضوع
-                        </label>
-
-                        <input type="text"
-                               name="title"
-                               class="form-control"
-                               required>
-
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">عنوان الموضوع / الخبر <span class="text-danger">*</span></label>
+                        <input type="text" name="title" class="form-control" required>
                     </div>
 
-                    <div class="mb-3 text-start">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">محتوى المنشور أو التفاصيل <span class="text-danger">*</span></label>
+                        <textarea name="content" rows="4" class="form-control" required></textarea>
+                    </div>
 
-                        <label class="form-label fw-bold">
-                            محتوى المنشور
-                        </label>
+                    <hr class="my-4">
 
-                        <textarea name="content"
-                                  rows="4"
-                                  class="form-control"
-                                  required></textarea>
+                    <!-- خيارات إضافة استطلاع رأي (اختياري) -->
+                    <div class="p-3 bg-light rounded-3 border">
+                        <h6 class="text-danger fw-bold mb-3">
+                            <i class="fas fa-poll"></i> إضافة استطلاع رأي (اختياري)
+                        </h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">سؤال الاستطلاع:</label>
+                            <input type="text" name="poll_question" class="form-control form-control-sm" placeholder="مثال: ما هي الفعالية القادمة التي تفضلها؟">
+                        </div>
 
+                        <label class="form-label small fw-bold">خيارات التصويت:</label>
+                        <div id="pollOptionsContainer">
+                            <div class="input-group input-group-sm mb-2">
+                                <input type="text" name="poll_options[]" class="form-control" placeholder="الخيار الأول">
+                            </div>
+                            <div class="input-group input-group-sm mb-2">
+                                <input type="text" name="poll_options[]" class="form-control" placeholder="الخيار الثاني">
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-secondary mt-1" onclick="addPollOption()">
+                            <i class="fas fa-plus"></i> إضافة خيار آخر
+                        </button>
                     </div>
 
                 </div>
 
                 <div class="modal-footer">
-
-                    <button type="button"
-                            class="btn btn-secondary"
-                            data-bs-dismiss="modal">
-                        إغلاق
-                    </button>
-
-                    <button type="submit"
-                            class="btn btn-danger">
-                        نشر الموضوع
-                    </button>
-
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                    <button type="submit" class="btn btn-danger px-4">نشر الموضوع</button>
                 </div>
-
             </form>
 
         </div>
-
     </div>
-
 </div>
+
+<!-- Script صغير لإضافة حقول خيارات جديدة للاستطلاع ديناميكياً -->
+<script>
+    function addPollOption() {
+        const container = document.getElementById('pollOptionsContainer');
+        const input = document.createElement('div');
+        input.className = 'input-group input-group-sm mb-2';
+        input.innerHTML = `<input type="text" name="poll_options[]" class="form-control" placeholder="خيار إضافي">
+                           <button type="button" class="btn btn-outline-danger" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>`;
+        container.appendChild(input);
+    }
+</script>
 
 {% endif %}
 
 {% endblock %}
-```
