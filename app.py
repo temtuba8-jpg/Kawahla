@@ -2772,40 +2772,18 @@ def google_site_verification():
 def sitemap_xml():
 
     pages = [
-        url_for(
-            "index",
-            _external=True
-        ),
-        url_for(
-            "all_news",
-            _external=True
-        ),
-        url_for(
-            "princes",
-            _external=True
-        ),
-        url_for(
-            "tree",
-            _external=True
-        ),
-        url_for(
-            "leaders",
-            _external=True
-        ),
-        url_for(
-            "register",
-            _external=True
-        ),
-        url_for(
-            "login",
-            _external=True
-        ),
+        url_for("index", _external=True),
+        url_for("all_news", _external=True),
+        url_for("princes", _external=True),
+        url_for("tree", _external=True),
+        url_for("leaders", _external=True),
+        url_for("register", _external=True),
+        url_for("login", _external=True),
     ]
 
     xml_items = []
 
     for page_url in pages:
-
         xml_items.append(
             f"""
     <url>
@@ -2813,6 +2791,17 @@ def sitemap_xml():
     </url>
 """
         )
+
+    sitemap = f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{''.join(xml_items)}
+</urlset>
+"""
+
+    return Response(
+        sitemap,
+        mimetype="application/xml"
+    )
 
     # -----------------------------------------------------
     # إضافة صفحات الأخبار
