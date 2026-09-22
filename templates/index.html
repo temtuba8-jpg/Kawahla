@@ -1,125 +1,525 @@
 {% extends "base.html" %}
+
+{% block title %}
+موقع قبيلة الكواهلة | أخبار الكواهلة وشجرة الأنساب
+{% endblock %}
+
+{% block meta_description %}
+موقع قبيلة الكواهلة، منصة تهتم بتوثيق أنساب الكواهلة وفروعها، أخبار الكواهلة وفعالياتها، شجرة الأنساب والأمراء والقيادات ومنتدى أبناء القبيلة.
+{% endblock %}
+
+{% block og_title %}
+قبيلة الكواهلة | أخبار الكواهلة وشجرة الأنساب
+{% endblock %}
+
+{% block og_description %}
+منصة رقمية تهتم بتوثيق أنساب قبيلة الكواهلة وفروعها وأخبارها وفعالياتها وشجرة الأنساب والأمراء والقيادات.
+{% endblock %}
+
 {% block content %}
 
-<!-- 1. السلايدر المتحرك (يدعم الروابط الخارجية لـ ImgBB والملفات المحلية) -->
-{% if sliders %}
-<div id="tribeSlider" class="carousel slide mb-5 shadow-lg rounded-4 overflow-hidden border border-warning" data-bs-ride="carousel">
-    <div class="carousel-indicators">
-        {% for s in sliders %}
-            <button type="button" data-bs-target="#tribeSlider" data-bs-slide-to="{{ loop.index0 }}" {% if loop.first %}class="active"{% endif %}></button>
-        {% endfor %}
-    </div>
-    <div class="carousel-inner" style="max-height: 480px;">
-        {% for s in sliders %}
-        <div class="carousel-item {% if loop.first %}active{% endif %}">
-            <img src="{% if s.image %}{% if s.image.startswith('http') %}{{ s.image }}{% else %}{{ url_for('static', filename='uploads/' + s.image) }}{% endif %}{% endif %}" 
-                 class="d-block w-100 object-fit-cover" 
-                 style="height: 480px;" 
-                 alt="Slider Image"
-                 onerror="this.onerror=null; this.src='{{ url_for('static', filename='default.png') }}';">
-            
-            <div class="carousel-caption d-none d-md-block p-4 rounded" style="background: rgba(0, 0, 0, 0.75);">
-                <h3 class="fw-bold text-gold">{{ s.title }}</h3>
-                <p class="fs-5 text-light">{{ s.description }}</p>
-            </div>
+<!-- المقدمة الرئيسية -->
+<section class="mb-5">
+
+    <div class="p-4 p-md-5 text-white rounded-4 shadow-lg text-center border border-warning"
+         style="background: linear-gradient(135deg, var(--primary-red), var(--dark-red));">
+
+        <h1 class="display-5 fw-bold text-gold mb-3">
+            موقع قبيلة الكواهلة
+        </h1>
+
+        <p class="lead mt-2 text-light mb-3">
+            منصة رقمية للتعريف بقبيلة الكواهلة، وتوثيق الأنساب والفروع،
+            ونشر أخبار الكواهلة وفعالياتهم والتعريف بشجرة الأنساب والقيادات.
+        </p>
+
+        <p class="text-light mb-4">
+            مرحبًا بكم في موقع الكواهلة، حيث يمكن لأبناء القبيلة وزوار الموقع
+            الاطلاع على المعلومات المنشورة حول الأنساب والفروع والأخبار والفعاليات.
+        </p>
+
+        <div class="mt-3">
+
+            <a href="{{ url_for('register') }}"
+               class="btn btn-warning text-dark btn-lg px-4 fw-bold me-2 mb-2">
+                سجل الآن ككاهلي
+            </a>
+
+            <a href="{{ url_for('tree') }}"
+               class="btn btn-outline-light btn-lg px-4 fw-bold mb-2">
+                شجرة أنساب الكواهلة
+            </a>
+
         </div>
+
+    </div>
+
+</section>
+
+
+<!-- السلايدر -->
+{% if sliders %}
+
+<div id="tribeSlider"
+     class="carousel slide mb-5 shadow-lg rounded-4 overflow-hidden border border-warning"
+     data-bs-ride="carousel"
+     aria-label="أخبار وفعاليات قبيلة الكواهلة">
+
+    <div class="carousel-indicators">
+
+        {% for s in sliders %}
+
+        <button type="button"
+                data-bs-target="#tribeSlider"
+                data-bs-slide-to="{{ loop.index0 }}"
+                {% if loop.first %}class="active"{% endif %}
+                aria-label="الشريحة {{ loop.index }}">
+        </button>
+
         {% endfor %}
+
     </div>
-    <button class="carousel-control-prev" type="button" data-bs-target="#tribeSlider" data-bs-slide="prev">
+
+
+    <div class="carousel-inner" style="max-height: 480px;">
+
+        {% for s in sliders %}
+
+        <div class="carousel-item {% if loop.first %}active{% endif %}">
+
+            <img src="{% if s.image %}{% if s.image.startswith('http') %}{{ s.image }}{% else %}{{ url_for('static', filename='uploads/' + s.image) }}{% endif %}{% endif %}"
+                 class="d-block w-100 object-fit-cover"
+                 style="height: 480px;"
+                 alt="{{ s.title if s.title else 'أخبار وفعاليات قبيلة الكواهلة' }}"
+                 loading="{% if loop.first %}eager{% else %}lazy{% endif %}"
+                 onerror="this.onerror=null; this.src='{{ url_for('static', filename='default.png') }}';">
+
+            <div class="carousel-caption d-none d-md-block p-4 rounded"
+                 style="background: rgba(0, 0, 0, 0.75);">
+
+                <h2 class="fw-bold text-gold">
+                    {{ s.title }}
+                </h2>
+
+                <p class="fs-5 text-light">
+                    {{ s.description }}
+                </p>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+
+    <button class="carousel-control-prev"
+            type="button"
+            data-bs-target="#tribeSlider"
+            data-bs-slide="prev"
+            aria-label="الشريحة السابقة">
+
         <span class="carousel-control-prev-icon"></span>
+
     </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#tribeSlider" data-bs-slide="next">
+
+
+    <button class="carousel-control-next"
+            type="button"
+            data-bs-target="#tribeSlider"
+            data-bs-slide="next"
+            aria-label="الشريحة التالية">
+
         <span class="carousel-control-next-icon"></span>
+
     </button>
+
 </div>
-{% else %}
-<!-- واجهة ترحيبية افتراضية في حال لم يضف الآدمن صور سلايدر بعد -->
-<div class="p-5 mb-5 text-white rounded-4 shadow text-center border border-warning" style="background: linear-gradient(135deg, var(--primary-red), var(--dark-red));">
-    <h1 class="display-5 fw-bold text-gold">مرحباً بكم في بوابة قبيلة الكواهلة</h1>
-    <p class="lead mt-2 text-light">منصة توثيق الأنساب الشاملة لأكثر من مليون نسمة من أبناء القبيلة وفروعها العربية.</p>
-    <div class="mt-4">
-        <a href="{{ url_for('register') }}" class="btn btn-warning text-dark btn-lg px-4 fw-bold me-2 mb-2">سجل الآن ككاهلي</a>
-        <a href="{{ url_for('tree') }}" class="btn btn-outline-light btn-lg px-4 fw-bold mb-2">شجرة الأنساب الذكية</a>
-    </div>
-</div>
+
 {% endif %}
 
 
-<!-- 2. قسم نسب وتاريخ قبيلة الكواهلة (تصميم تبويبي احترافي) -->
-<div class="row mb-5">
+<!-- تعريف الكواهلة -->
+<section class="row mb-5">
+
     <div class="col-12">
+
         <div class="card shadow-lg border-0 rounded-4 overflow-hidden border-top border-warning border-4">
-            
-            <!-- رأس البطاقة -->
+
             <div class="card-header bg-white p-4 text-center border-bottom">
-                <span class="badge bg-danger text-light px-3 py-2 mb-2">التوثيق التاريخي والأنساب</span>
-                <h2 class="fw-bold text-danger mb-1"><i class="fas id-card text-gold me-2"></i> موسوعة نسب وتاريخ قبيلة الكواهلة</h2>
-                <p class="text-muted small mb-0">الجذور، سلاسل النسب المتداولة، البطون، والانتشار الجغرافي</p>
+
+                <span class="badge bg-danger text-light px-3 py-2 mb-2">
+                    التعريف والتوثيق
+                </span>
+
+                <h2 class="fw-bold text-danger mb-2">
+                    قبيلة الكواهلة: الأنساب والفروع والانتشار
+                </h2>
+
+                <p class="text-muted mb-0">
+                    معلومات تعريفية عن الكواهلة وشجرة الأنساب والفروع والموروث المتداول
+                </p>
+
             </div>
 
+
             <div class="card-body p-4 p-md-5 bg-light">
-                
-                <!-- شريط التنقل بين التبويبات -->
-                <ul class="nav nav-pills justify-content-center mb-4 gap-2" id="tribeTabs" role="tablist">
+
+                <p class="text-secondary"
+                   style="line-height: 2;">
+
+                    تُعد <strong>قبيلة الكواهلة</strong> من القبائل المعروفة في السودان،
+                    ويُستخدم اسم <strong>الكواهلة</strong> وكذلك صيغة
+                    <strong>كواهله</strong> في البحث والإشارة إلى أبناء القبيلة.
+                    ويهتم هذا الموقع بجمع المعلومات المنشورة عن الأنساب والفروع،
+                    إلى جانب أخبار الكواهلة وفعالياتهم والتعريف بالقيادات وشجرة الأنساب.
+
+                </p>
+
+                <p class="text-secondary"
+                   style="line-height: 2;">
+
+                    ويضم الموقع أقسامًا مخصصة لـ
+                    <strong>شجرة أنساب الكواهلة</strong>،
+                    والأمراء والقيادات، وأخبار القبيلة والمنتدى،
+                    بهدف توفير منصة رقمية منظمة لأبناء الكواهلة والمهتمين بتاريخ القبيلة
+                    والمعلومات المتداولة حول فروعها وانتشارها.
+
+                </p>
+
+                <div class="row g-3 mt-3">
+
+                    <div class="col-md-4">
+
+                        <a href="{{ url_for('tree') }}"
+                           class="text-decoration-none">
+
+                            <div class="p-4 bg-white rounded-4 shadow-sm border text-center h-100">
+
+                                <i class="fas fa-sitemap fa-2x text-danger mb-3"></i>
+
+                                <h3 class="h5 fw-bold text-danger">
+                                    شجرة أنساب الكواهلة
+                                </h3>
+
+                                <p class="text-muted small mb-0">
+                                    استعرض قسم شجرة الأنساب والروابط العائلية المنشورة.
+                                </p>
+
+                            </div>
+
+                        </a>
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <a href="{{ url_for('leaders') }}"
+                           class="text-decoration-none">
+
+                            <div class="p-4 bg-white rounded-4 shadow-sm border text-center h-100">
+
+                                <i class="fas fa-crown fa-2x text-warning mb-3"></i>
+
+                                <h3 class="h5 fw-bold"
+                                    style="color: #b89728;">
+                                    أمراء وقيادات الكواهلة
+                                </h3>
+
+                                <p class="text-muted small mb-0">
+                                    تعرف على الشخصيات والقيادات المدرجة في الموقع.
+                                </p>
+
+                            </div>
+
+                        </a>
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <a href="{{ url_for('all_news') }}"
+                           class="text-decoration-none">
+
+                            <div class="p-4 bg-white rounded-4 shadow-sm border text-center h-100">
+
+                                <i class="fas fa-newspaper fa-2x text-danger mb-3"></i>
+
+                                <h3 class="h5 fw-bold text-danger">
+                                    أخبار الكواهلة
+                                </h3>
+
+                                <p class="text-muted small mb-0">
+                                    تابع الأخبار والفعاليات المنشورة الخاصة بأبناء القبيلة.
+                                </p>
+
+                            </div>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- قسم النسب -->
+<section class="row mb-5">
+
+    <div class="col-12">
+
+        <div class="card shadow-lg border-0 rounded-4 overflow-hidden border-top border-warning border-4">
+
+            <div class="card-header bg-white p-4 text-center border-bottom">
+
+                <span class="badge bg-danger text-light px-3 py-2 mb-2">
+                    التوثيق التاريخي والأنساب
+                </span>
+
+                <h2 class="fw-bold text-danger mb-1">
+                    موسوعة نسب وتاريخ قبيلة الكواهلة
+                </h2>
+
+                <p class="text-muted small mb-0">
+                    الجذور، سلاسل النسب المتداولة، البطون، والانتشار الجغرافي
+                </p>
+
+            </div>
+
+
+            <div class="card-body p-4 p-md-5 bg-light">
+
+                <ul class="nav nav-pills justify-content-center mb-4 gap-2"
+                    id="tribeTabs"
+                    role="tablist">
+
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active fw-bold px-4 rounded-pill shadow-sm" id="intro-tab" data-bs-toggle="pill" data-bs-target="#intro" type="button" role="tab">النبذة التعريفية</button>
+
+                        <button class="nav-link active fw-bold px-4 rounded-pill shadow-sm"
+                                id="intro-tab"
+                                data-bs-toggle="pill"
+                                data-bs-target="#intro"
+                                type="button"
+                                role="tab">
+
+                            النبذة التعريفية
+
+                        </button>
+
                     </li>
+
+
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link fw-bold px-4 rounded-pill shadow-sm" id="lineage-tab" data-bs-toggle="pill" data-bs-target="#lineage" type="button" role="tab">سلسلة النسب الشريف</button>
+
+                        <button class="nav-link fw-bold px-4 rounded-pill shadow-sm"
+                                id="lineage-tab"
+                                data-bs-toggle="pill"
+                                data-bs-target="#lineage"
+                                type="button"
+                                role="tab">
+
+                            سلسلة النسب المتداولة
+
+                        </button>
+
                     </li>
+
+
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link fw-bold px-4 rounded-pill shadow-sm" id="branches-tab" data-bs-toggle="pill" data-bs-target="#branches" type="button" role="tab">الفروع والبطون</button>
+
+                        <button class="nav-link fw-bold px-4 rounded-pill shadow-sm"
+                                id="branches-tab"
+                                data-bs-toggle="pill"
+                                data-bs-target="#branches"
+                                type="button"
+                                role="tab">
+
+                            الفروع والبطون
+
+                        </button>
+
                     </li>
+
+
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link fw-bold px-4 rounded-pill shadow-sm" id="geography-tab" data-bs-toggle="pill" data-bs-target="#geography" type="button" role="tab">الموطن والانتشار</button>
+
+                        <button class="nav-link fw-bold px-4 rounded-pill shadow-sm"
+                                id="geography-tab"
+                                data-bs-toggle="pill"
+                                data-bs-target="#geography"
+                                type="button"
+                                role="tab">
+
+                            الموطن والانتشار
+
+                        </button>
+
                     </li>
+
                 </ul>
 
-                <!-- محتويات التبويبات -->
-                <div class="tab-content bg-white p-4 p-md-4 rounded-4 shadow-sm border" id="tribeTabsContent">
-                    
-                    <!-- 1. النبذة التعريفية -->
-                    <div class="tab-pane fade show active" id="intro" role="tabpanel" aria-labelledby="intro-tab">
-                        <h4 class="fw-bold text-danger mb-3 border-bottom pb-2"><i class="fas fa-info-circle text-gold me-2"></i> أصالة وعراقة الكواهلة</h4>
-                        <p class="text-secondary" style="line-height: 1.9;">
-                            تُعد قبيلة الكواهلة من القبائل العربية الكبيرة والمعروفة في السودان، ويُعرف أبناؤها كذلك باسم <strong>بني كاهل</strong> أو <strong>أولاد كاهل</strong>. وقد عُرف للكواهلة انتشار واسع في السودان، ولا سيما على امتداد مناطق النيل الأبيض والنيل الأزرق والجزيرة والبطانة وشمال وشرق السودان وكردفان، كما امتد وجودهم إلى مصر والمملكة العربية السعودية وغيرها من البلدان.
+
+                <div class="tab-content bg-white p-4 rounded-4 shadow-sm border"
+                     id="tribeTabsContent">
+
+
+                    <!-- النبذة -->
+                    <div class="tab-pane fade show active"
+                         id="intro"
+                         role="tabpanel"
+                         aria-labelledby="intro-tab">
+
+                        <h3 class="fw-bold text-danger mb-3 border-bottom pb-2">
+
+                            <i class="fas fa-info-circle text-gold me-2"></i>
+
+                            نبذة عن قبيلة الكواهلة
+
+                        </h3>
+
+                        <p class="text-secondary"
+                           style="line-height: 1.9;">
+
+                            يهتم موقع الكواهلة بتوثيق المعلومات المتداولة حول
+                            <strong>قبيلة الكواهلة</strong> وفروعها وأنسابها،
+                            مع عرض الروايات والمعلومات التاريخية المنشورة بصورة منظمة.
+                            كما يوفر الموقع مساحة لمتابعة أخبار وفعاليات أبناء الكواهلة.
+
                         </p>
-                        <p class="text-secondary" style="line-height: 1.9;">
-                            ويرجع اسم الكواهلة إلى جد القبيلة <strong>كاهل</strong>، وتتناقل بطون القبيلة رواية نسبية مشهورة تربط جدهم كاهلًا بذرية الصحابي الجليل <strong>الزبير بن العوام رضي الله عنه</strong>، وهو من بني أسد من قريش، وأحد العشرة المبشرين بالجنة.
+
+                        <p class="text-secondary"
+                           style="line-height: 1.9;">
+
+                            وتختلف بعض الروايات والمصادر في تفاصيل الأنساب والفروع،
+                            ولذلك تُعرض المعلومات المتعلقة بالنسب باعتبارها من الروايات
+                            والموروثات المتداولة، مع الإشارة إلى اختلاف المصادر عند الحاجة.
+
                         </p>
+
                     </div>
 
-                    <!-- 2. سلسلة النسب الشريف -->
-                    <div class="tab-pane fade" id="lineage" role="tabpanel" aria-labelledby="lineage-tab">
-                        <h4 class="fw-bold text-danger mb-3 border-bottom pb-2"><i class="fas fa-sitemap text-gold me-2"></i> التسلسل النسبي والارتباط القرشي</h4>
-                        <p class="text-secondary mb-3">ومن أشهر ما ترويه نسابة الكواهلة في السودان لسلسلة النسب المتداولة:</p>
-                        
-                        <div class="p-3 bg-light rounded border border-warning text-center fw-bold text-dark mb-4 shadow-sm" style="font-size: 0.95rem; line-height: 2.2;">
-                            كاهل بن عامر بن مدش بن موسى <span class="text-danger">(الملقب بالتنين)</span> بن عبد الله بن الزبير بن العوام بن خويلد بن أسد بن عبد العزى بن قصي بن كلاب بن مرة بن كعب بن لؤي بن غالب بن فهر بن مالك بن النضر بن كنانة.
+
+                    <!-- النسب -->
+                    <div class="tab-pane fade"
+                         id="lineage"
+                         role="tabpanel"
+                         aria-labelledby="lineage-tab">
+
+                        <h3 class="fw-bold text-danger mb-3 border-bottom pb-2">
+
+                            <i class="fas fa-sitemap text-gold me-2"></i>
+
+                            سلسلة النسب المتداولة لدى الكواهلة
+
+                        </h3>
+
+                        <p class="text-secondary mb-3">
+                            من أشهر سلاسل النسب المتداولة في الموروث النسبي للكواهلة:
+                        </p>
+
+
+                        <div class="p-3 bg-light rounded border border-warning text-center fw-bold text-dark mb-4 shadow-sm"
+                             style="font-size: 0.95rem; line-height: 2.2;">
+
+                            كاهل بن عامر بن مدش بن موسى
+                            <span class="text-danger">(الملقب بالتنين)</span>
+                            بن عبد الله بن الزبير بن العوام بن خويلد بن أسد بن عبد العزى
+                            بن قصي بن كلاب بن مرة بن كعب بن لؤي بن غالب بن فهر بن مالك
+                            بن النضر بن كنانة.
+
                         </div>
+
 
                         <div class="row g-3">
+
                             <div class="col-md-6">
+
                                 <div class="p-3 bg-light rounded border h-100">
-                                    <h5 class="fw-bold text-danger small"><i class="fas fa-star text-gold me-1"></i> التعريف بالزبير بن العوام</h5>
-                                    <p class="text-muted small mb-0">هو الزبير بن العوام الأسدي القرشي، وأمه صفية بنت عبد المطلب عمة النبي محمد صلى الله عليه وسلم، وزوجته أسماء بنت أبي بكر الصديق رضي الله عنهما، وهي أم ابنه عبد الله بن الزبير.</p>
+
+                                    <h4 class="fw-bold text-danger small">
+
+                                        <i class="fas fa-star text-gold me-1"></i>
+
+                                        الزبير بن العوام
+
+                                    </h4>
+
+                                    <p class="text-muted small mb-0">
+
+                                        الزبير بن العوام الأسدي القرشي من الشخصيات
+                                        المعروفة في التاريخ الإسلامي، وتتناول روايات
+                                        النسب المتداولة لدى الكواهلة صلة النسب به.
+
+                                    </p>
+
                                 </div>
+
                             </div>
+
+
                             <div class="col-md-6">
+
                                 <div class="p-3 bg-light rounded border h-100">
-                                    <h5 class="fw-bold text-danger small"><i class="fas fa-code-branch text-gold me-1"></i> تعدد الصيغ والروايات</h5>
-                                    <p class="text-muted small mb-0">توجد صيغ متقاربة أخرى لدى بعض النسابة (مثل ورود محمد كاهل بن عابد بن يحيى)، إلا أن الرواية الزبيرية تظل هي الأشهر والأبرز في الموروث القبلي للكواهلة في السودان.</p>
+
+                                    <h4 class="fw-bold text-danger small">
+
+                                        <i class="fas fa-code-branch text-gold me-1"></i>
+
+                                        اختلاف الروايات
+
+                                    </h4>
+
+                                    <p class="text-muted small mb-0">
+
+                                        توجد صيغ وروايات مختلفة في بعض تفاصيل نسب
+                                        وفروع الكواهلة، ويهدف الموقع إلى عرض المعلومات
+                                        المتداولة مع الحفاظ على الإشارة إلى اختلاف المصادر.
+
+                                    </p>
+
                                 </div>
+
                             </div>
+
                         </div>
+
                     </div>
 
-                    <!-- 3. الفروع والبطون -->
-                    <div class="tab-pane fade" id="branches" role="tabpanel" aria-labelledby="branches-tab">
-                        <h4 class="fw-bold text-danger mb-3 border-bottom pb-2"><i class="fas fa-users text-gold me-2"></i> بطون وفروع قبيلة الكواهلة</h4>
-                        <p class="text-secondary mb-3">تنسب روايات الكواهلة إلى كاهل عددًا كبيرًا من البطون والفروع التي انتشرت في أنحاء السودان، ومن أشهر هذه الأسماء:</p>
-                        
+
+                    <!-- الفروع -->
+                    <div class="tab-pane fade"
+                         id="branches"
+                         role="tabpanel"
+                         aria-labelledby="branches-tab">
+
+                        <h3 class="fw-bold text-danger mb-3 border-bottom pb-2">
+
+                            <i class="fas fa-users text-gold me-2"></i>
+
+                            فروع وبطون قبيلة الكواهلة
+
+                        </h3>
+
+                        <p class="text-secondary mb-3">
+
+                            تتضمن المعلومات المنشورة حول الكواهلة أسماء عدد من الفروع
+                            والبطون، ومن الأسماء المتداولة:
+
+                        </p>
+
+
                         <div class="d-flex flex-wrap gap-2 mb-4">
+
                             <span class="badge bg-secondary px-3 py-2 fs-6">الحسانية</span>
                             <span class="badge bg-secondary px-3 py-2 fs-6">الحسنات</span>
                             <span class="badge bg-secondary px-3 py-2 fs-6">الأحامدة</span>
@@ -148,120 +548,283 @@
                             <span class="badge bg-secondary px-3 py-2 fs-6">اليزيدية</span>
                             <span class="badge bg-secondary px-3 py-2 fs-6">الدليقاب</span>
                             <span class="badge bg-secondary px-3 py-2 fs-6">الشنابلة</span>
+
                         </div>
-                        <p class="text-muted small mb-0">تشير الروايات إلى أن من أبناء كاهل (خليفة وأبرق)، ومن ذرية خليفة جاء حسان (جد الحسانية)، بينما تتفرع من أبرق وآخرين بقية البطون، وهو ما يفسر اتساع التشعب الداخلي للقبيلة.</p>
+
+
+                        <p class="text-muted small mb-0">
+
+                            تُعرض هذه الأسماء ضمن المعلومات والروايات المتداولة
+                            حول فروع الكواهلة، مع مراعاة اختلاف المصادر في بعض التفاصيل.
+
+                        </p>
+
                     </div>
 
-                    <!-- 4. الموطن والانتشار -->
-                    <div class="tab-pane fade" id="geography" role="tabpanel" aria-labelledby="geography-tab">
-                        <h4 class="fw-bold text-danger mb-3 border-bottom pb-2"><i class="fas fa-map-marked-alt text-gold me-2"></i> الموطن والامتداد الجغرافي</h4>
-                        <p class="text-secondary" style="line-height: 1.8;">
-                            ارتبط تاريخ الكواهلة في السودان بمناطق واسعة، فانتشروا بمحاذاة النيل، ثم امتد وجودهم إلى **النيل الأبيض والنيل الأزرق والجزيرة والبطانة وشمال كردفان وشرق السودان**، وتوجد لهم فروع ومجموعات في مناطق أخرى من السودان، بالإضافة إلى وجودهم في **مصر والمملكة العربية السعودية**.
+
+                    <!-- الانتشار -->
+                    <div class="tab-pane fade"
+                         id="geography"
+                         role="tabpanel"
+                         aria-labelledby="geography-tab">
+
+                        <h3 class="fw-bold text-danger mb-3 border-bottom pb-2">
+
+                            <i class="fas fa-map-marked-alt text-gold me-2"></i>
+
+                            انتشار الكواهلة
+
+                        </h3>
+
+                        <p class="text-secondary"
+                           style="line-height: 1.8;">
+
+                            ارتبط تاريخ الكواهلة بمناطق واسعة في السودان،
+                            وتوجد معلومات وروايات عن وجود أبناء وفروع للقبيلة
+                            في عدد من المناطق السودانية، إضافة إلى وجود مجموعات
+                            من الكواهلة خارج السودان.
+
                         </p>
-                        <p class="text-secondary" style="line-height: 1.8;">
-                            وتذكر بعض المصادر التاريخية أن جماعات من أولاد كاهل كانت معروفة في منطقة البحر الأحمر وعيذاب في العصور الوسطى.
+
+                        <p class="text-secondary"
+                           style="line-height: 1.8;">
+
+                            ويهدف هذا القسم إلى جمع المعلومات المتعلقة بموطن
+                            وانتشار الكواهلة بطريقة منظمة، مع مراعاة اختلاف
+                            المصادر التاريخية في بعض التفاصيل.
+
                         </p>
-                        
-                        <!-- كلمة جامعة وخاتمة -->
+
+
                         <div class="p-3 bg-light rounded-3 border-start border-warning border-4 text-secondary small mt-3">
+
                             <i class="fas fa-university text-gold me-1"></i>
-                            <strong>كلمة جامعة:</strong> يشكل الكواهلة امتدادًا قبليًا واسعًا أسهم بفعالية في الحياة الاجتماعية والاقتصادية والزراعية والرعوية والتجارية بالسودان. ويُحفظ هذا النسب التليد باعتباره أشهر الروايات المتوارثة، مع مراعاة اختلاف المصادر التاريخية في بعض التفاصيل الجزئية لأنساب الفروع.
+
+                            <strong>ملاحظة:</strong>
+
+                            المعلومات المتعلقة بالأنساب والتاريخ والانتشار قد تختلف
+                            بين المصادر والروايات، ولذلك ينبغي التعامل معها باعتبارها
+                            معلومات موثقة بالمصادر أو روايات متداولة بحسب ما يوضحه كل قسم.
+
                         </div>
+
                     </div>
 
                 </div>
 
             </div>
+
         </div>
+
     </div>
-</div>
+
+</section>
 
 
-<!-- 3. قسم الأخبار والفعاليات الديناميكي (يدعم صور ImgBB أيضاً) -->
-<div class="mb-5">
+<!-- أخبار الكواهلة -->
+<section class="mb-5">
+
     <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
-        <h3 class="text-danger fw-bold"><i class="fas fa-newspaper me-2 text-gold"></i> أخبار وفعاليات القبيلة</h3>
-        <span class="badge bg-danger text-light px-3 py-2">محدث دائماً</span>
+
+        <h2 class="text-danger fw-bold">
+
+            <i class="fas fa-newspaper me-2 text-gold"></i>
+
+            أخبار الكواهلة وفعاليات القبيلة
+
+        </h2>
+
+        <span class="badge bg-danger text-light px-3 py-2">
+            محدث دائماً
+        </span>
+
     </div>
+
 
     <div class="row">
+
         {% for n in news %}
+
         <div class="col-md-4 mb-4">
-            <div class="card h-100 shadow-sm border-top border-danger border-4">
+
+            <article class="card h-100 shadow-sm border-top border-danger border-4">
+
                 {% if n.image %}
-                <!-- كود ذكي لصور الأخبار -->
-                <img src="{% if n.image.startswith('http') %}{{ n.image }}{% else %}{{ url_for('static', filename='uploads/' + n.image) }}{% endif %}" 
-                     class="card-img-top object-fit-cover" 
-                     style="height: 200px;" 
-                     alt="News Image"
+
+                <img src="{% if n.image.startswith('http') %}{{ n.image }}{% else %}{{ url_for('static', filename='uploads/' + n.image) }}{% endif %}"
+                     class="card-img-top object-fit-cover"
+                     style="height: 200px;"
+                     alt="{{ n.title if n.title else 'خبر من أخبار الكواهلة' }}"
+                     loading="lazy"
                      onerror="this.style.display='none';">
+
                 {% endif %}
+
+
                 <div class="card-body">
-                    <small class="text-muted"><i class="fas fa-calendar-alt me-1 text-gold"></i> {{ n.date }}</small>
-                    <h5 class="card-title fw-bold text-danger mt-2">{{ n.title }}</h5>
-                    <p class="card-text text-secondary small">{{ n.content }}</p>
+
+                    <small class="text-muted">
+
+                        <i class="fas fa-calendar-alt me-1 text-gold"></i>
+
+                        {{ n.date }}
+
+                    </small>
+
+
+                    <h3 class="h5 card-title fw-bold text-danger mt-2">
+                        {{ n.title }}
+                    </h3>
+
+
+                    <p class="card-text text-secondary small">
+                        {{ n.content }}
+                    </p>
+
                 </div>
-            </div>
+
+            </article>
+
         </div>
+
         {% else %}
+
         <div class="col-12 text-center py-4 bg-white rounded shadow-sm border">
-            <p class="text-muted mb-0"><i class="fas fa-info-circle text-gold me-1"></i> لا توجد أخبار منشورة حالياً. (يمكن للآدمن إضافة الأخبار والفعاليات بسهولة من لوحة التحكم).</p>
+
+            <p class="text-muted mb-0">
+
+                <i class="fas fa-info-circle text-gold me-1"></i>
+
+                لا توجد أخبار منشورة حالياً.
+
+            </p>
+
         </div>
+
         {% endfor %}
-    </div>
-</div>
 
-<!-- 4. الأقسام الثلاثة الأساسية (أخبار، أمراء، شجرة الأنساب) - روابط تفاعلية -->
-<div class="row text-center mt-5">
+    </div>
+
+</section>
+
+
+<!-- الأقسام الأساسية -->
+<section class="row text-center mt-5">
+
     <div class="col-md-4 mb-4">
-        <a href="{{ url_for('all_news') }}" class="text-decoration-none">
+
+        <a href="{{ url_for('all_news') }}"
+           class="text-decoration-none">
+
             <div class="card p-4 shadow-sm border-top border-danger border-4 h-100 feature-card transition-effect">
+
                 <i class="fas fa-newspaper fa-3x text-danger mb-3"></i>
-                <h3 class="h4 fw-bold text-danger">أخبار القبيلة</h3>
-                <p class="text-muted small">تابع أحدث أخبار وفعاليات أبناء الكواهلة وفروعها في السودان وكل مكان.</p>
-                <span class="btn btn-outline-danger btn-sm mt-auto fw-bold">تصفح الأخبار <i class="fas fa-arrow-left ms-1"></i></span>
-            </div>
-        </a>
-    </div>
-    <div class="col-md-4 mb-4">
-        <a href="{{ url_for('leaders') }}" class="text-decoration-none">
-            <div class="card p-4 shadow-sm border-top border-warning border-4 h-100 feature-card transition-effect">
-                <i class="fas fa-crown fa-3x text-warning mb-3"></i>
-                <h3 class="h4 fw-bold" style="color: #b89728;">الأمراء والقيادات</h3>
-                <p class="text-muted small">قسم خاص لتوثيق أمراء الفروع والشخصيات الهامة والرموز التاريخية.</p>
-                <span class="btn btn-outline-warning btn-sm mt-auto fw-bold text-dark">تصفح الأمراء <i class="fas fa-arrow-left ms-1"></i></span>
-            </div>
-        </a>
-    </div>
-    <div class="col-md-4 mb-4">
-        <a href="{{ url_for('tree') }}" class="text-decoration-none">
-            <div class="card p-4 shadow-sm border-top border-danger border-4 h-100 feature-card transition-effect">
-                <i class="fas fa-sitemap fa-3x text-danger mb-3"></i>
-                <h3 class="h4 fw-bold text-danger">شجرة الأنساب</h3>
-                <p class="text-muted small">استعرض شجرة أنساب قبيلة الكواهلة الذكية والروابط المكتشفة بين الأبناء.</p>
-                <span class="btn btn-outline-danger btn-sm mt-auto fw-bold">استعرض الشجرة <i class="fas fa-arrow-left ms-1"></i></span>
-            </div>
-        </a>
-    </div>
-</div>
 
-<!-- تأثيرات بسيطة للبطاقات -->
+                <h2 class="h4 fw-bold text-danger">
+                    أخبار قبيلة الكواهلة
+                </h2>
+
+                <p class="text-muted small">
+                    تابع أحدث أخبار وفعاليات أبناء الكواهلة وفروعها.
+                </p>
+
+                <span class="btn btn-outline-danger btn-sm mt-auto fw-bold">
+                    تصفح الأخبار
+                    <i class="fas fa-arrow-left ms-1"></i>
+                </span>
+
+            </div>
+
+        </a>
+
+    </div>
+
+
+    <div class="col-md-4 mb-4">
+
+        <a href="{{ url_for('leaders') }}"
+           class="text-decoration-none">
+
+            <div class="card p-4 shadow-sm border-top border-warning border-4 h-100 feature-card transition-effect">
+
+                <i class="fas fa-crown fa-3x text-warning mb-3"></i>
+
+                <h2 class="h4 fw-bold"
+                    style="color: #b89728;">
+
+                    أمراء وقيادات الكواهلة
+
+                </h2>
+
+                <p class="text-muted small">
+                    قسم لتوثيق الشخصيات والقيادات المدرجة في الموقع.
+                </p>
+
+                <span class="btn btn-outline-warning btn-sm mt-auto fw-bold text-dark">
+                    تصفح الأمراء
+                    <i class="fas fa-arrow-left ms-1"></i>
+                </span>
+
+            </div>
+
+        </a>
+
+    </div>
+
+
+    <div class="col-md-4 mb-4">
+
+        <a href="{{ url_for('tree') }}"
+           class="text-decoration-none">
+
+            <div class="card p-4 shadow-sm border-top border-danger border-4 h-100 feature-card transition-effect">
+
+                <i class="fas fa-sitemap fa-3x text-danger mb-3"></i>
+
+                <h2 class="h4 fw-bold text-danger">
+                    شجرة أنساب الكواهلة
+                </h2>
+
+                <p class="text-muted small">
+                    استعرض شجرة أنساب قبيلة الكواهلة والروابط العائلية المنشورة.
+                </p>
+
+                <span class="btn btn-outline-danger btn-sm mt-auto fw-bold">
+                    استعرض الشجرة
+                    <i class="fas fa-arrow-left ms-1"></i>
+                </span>
+
+            </div>
+
+        </a>
+
+    </div>
+
+</section>
+
+
+<!-- تأثيرات البطاقات -->
 <style>
+
 .transition-effect {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
+
 .transition-effect:hover {
     transform: translateY(-5px);
     box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
 }
+
 .nav-pills .nav-link.active {
     background-color: var(--bs-danger, #dc3545) !important;
     color: #fff !important;
 }
+
 .nav-pills .nav-link {
     color: #495057;
     background-color: #e9ecef;
 }
+
 </style>
 
 {% endblock %}
