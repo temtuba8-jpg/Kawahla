@@ -2757,6 +2757,12 @@ def robots_txt():
         mimetype="text/plain"
     )
 
+# =========================================================
+# روت بحث قوقل
+# =========================================================
+@app.route("/google9269c338022e040d.html")
+def google_site_verification():
+    return "google-site-verification: google9269c338022e040d.html"
 
 # =========================================================
 # Google SEO - sitemap.xml
