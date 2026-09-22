@@ -40,7 +40,7 @@ MONGO_PASSWORD = quote_plus("Fad%[400911923356")
 
 # إعداد اتصال MongoDB السحابي
 app.config["MONGO_URI"] = (
-    "mongodb+srv://kawahla:Fad%25%5B400911923356@cluster0.outspyb.mongodb.net/"
+    "mongodb+srv://kawahla:Fad%400911923356@cluster0.outspyb.mongodb.net/"
     "kawahla_db?retryWrites=true&w=majority&appName=Cluster0"
     "&tls=true&tlsAllowInvalidCertificates=true"
 )
@@ -52,7 +52,6 @@ mongo = PyMongo(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
-
 
 # =========================================================
 # رفع الصور إلى ImgBB
