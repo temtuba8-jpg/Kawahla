@@ -38,18 +38,16 @@ app.config["SECRET_KEY"] = "kawahla_secret_key_2026_super_secure"
 MONGO_USERNAME = "kawahla"
 MONGO_PASSWORD = quote_plus("Fad%[400911923356")
 
+# إعداد اتصال MongoDB السحابي
 app.config["MONGO_URI"] = (
-    f"mongodb+srv://{MONGO_USERNAME}:{MONGO_PASSWORD}@cluster0.outspyb.mongodb.net/"
+    "mongodb+srv://kawahla:Fad%25%5B400911923356@cluster0.outspyb.mongodb.net/"
     "kawahla_db?retryWrites=true&w=majority&appName=Cluster0"
     "&tls=true&tlsAllowInvalidCertificates=true"
 )
 
-
 IMGBB_API_KEY = "cc5590cadcc0d03fc63bbb5317442839"
 
-
 mongo = PyMongo(app)
-
 
 login_manager = LoginManager()
 login_manager.init_app(app)
