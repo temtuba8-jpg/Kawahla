@@ -1,67 +1,308 @@
 {% extends "base.html" %}
+
+{% block title %}
+شجرة أنساب الكواهلة | شجرة قبيلة الكواهلة وفروعها
+{% endblock %}
+
+{% block meta_description %}
+شجرة أنساب قبيلة الكواهلة، استعرض أبناء الكواهلة وفروع القبيلة والروابط العائلية والنسب المتداول بطريقة منظمة وتفاعلية.
+{% endblock %}
+
+{% block og_title %}
+شجرة أنساب الكواهلة | قبيلة الكواهلة
+{% endblock %}
+
+{% block og_description %}
+استعرض شجرة أنساب قبيلة الكواهلة وفروعها والروابط العائلية والمعلومات النسبية المنشورة في الموقع.
+{% endblock %}
+
 {% block content %}
+
+<!-- عنوان الصفحة -->
 <div class="text-center mb-4">
-    <h2 class="text-danger fw-bold"><i class="fas fa-sitemap"></i> شجرة أنساب قبيلة الكواهلة الذكية</h2>
-    <p class="text-muted">الربط التلقائي والذكي بين أبناء الفروع والأقارب والإخوة بناءً على تشابه الأنساب.</p>
+
+    <h1 class="text-danger fw-bold">
+        <i class="fas fa-sitemap"></i>
+        شجرة أنساب قبيلة الكواهلة
+    </h1>
+
+    <p class="text-muted fs-5">
+        شجرة الكواهلة التفاعلية لاستعراض الفروع والأنساب والروابط العائلية
+        بين أبناء القبيلة وفق البيانات المسجلة في الموقع.
+    </p>
+
 </div>
+
+
+<!-- تعريف الصفحة لمحركات البحث والزوار -->
+<section class="card mb-4 border-0 shadow-sm border-top border-warning border-4">
+
+    <div class="card-body p-4">
+
+        <h2 class="h4 text-danger fw-bold mb-3">
+            <i class="fas fa-sitemap text-warning me-2"></i>
+            شجرة الكواهلة وأنساب القبيلة
+        </h2>
+
+        <p class="text-secondary mb-2" style="line-height: 1.9;">
+
+            توفر هذه الصفحة <strong>شجرة أنساب الكواهلة</strong> بطريقة تفاعلية،
+            وتعرض المعلومات النسبية والفروع والروابط العائلية المسجلة في الموقع.
+            ويمكن للزائر استعراض بيانات أبناء <strong>قبيلة الكواهلة</strong>
+            والتعرف على الفروع والآباء والأجداد وفق المعلومات المتاحة.
+
+        </p>
+
+        <p class="text-secondary mb-0" style="line-height: 1.9;">
+
+            يتم عرض العلاقات النسبية بناءً على البيانات المسجلة،
+            مع مراعاة أن تفاصيل الأنساب قد تختلف بين المصادر والروايات،
+            ولذلك فإن المعلومات الظاهرة في هذه الصفحة مرتبطة بالبيانات
+            المضافة إلى الموقع.
+
+        </p>
+
+    </div>
+
+</section>
+
 
 <!-- صندوق الروابط الذكية المكتشفة -->
 <div class="card mb-4 p-3 border-warning bg-light shadow-sm">
-    <h5 class="text-danger fw-bold"><i class="fas fa-link"></i> علاقات القربى المكتشفة تلقائياً:</h5>
+
+    <h2 class="h5 text-danger fw-bold">
+        <i class="fas fa-link"></i>
+        علاقات القربى المكتشفة تلقائياً
+    </h2>
+
+    <p class="small text-muted mb-3">
+        الروابط النسبية التي تم اكتشافها من البيانات المسجلة لأبناء الكواهلة.
+    </p>
+
     <ul class="mb-0">
+
         {% for conn in connections %}
-            <li>يربط بين <strong>{{ conn.p1 }}</strong> و <strong>{{ conn.p2 }}</strong>: <span class="badge bg-warning text-dark">{{ conn.relation }}</span></li>
+
+            <li class="mb-2">
+
+                يربط بين
+
+                <strong>{{ conn.p1 }}</strong>
+
+                و
+
+                <strong>{{ conn.p2 }}</strong>:
+
+                <span class="badge bg-warning text-dark">
+                    {{ conn.relation }}
+                </span>
+
+            </li>
+
         {% else %}
-            <li class="text-muted">جاري بناء وشيجة الأنساب بناءً على تسجيلات الأبناء والفروع...</li>
+
+            <li class="text-muted">
+                جاري بناء وشيجة الأنساب بناءً على تسجيلات الأبناء والفروع...
+            </li>
+
         {% endfor %}
+
     </ul>
+
 </div>
 
-<div class="row text-center">
-    {% for u in users %}
-    <div class="col-md-3 mb-4">
-        <div class="card p-3 shadow-sm border-top border-danger border-4 h-100" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#userModal{{ u.id }}">
-            
-            <!-- الصورة: تدعم روابط ImgBB الخارجية والملفات المحلية مع صورة افتراضية عند الخطأ -->
-            <img src="{% if u.profile_pic %}{% if u.profile_pic.startswith('http') %}{{ u.profile_pic }}{% else %}{{ url_for('static', filename='uploads/' + u.profile_pic) }}{% endif %}{% else %}{{ url_for('static', filename='default.png') }}{% endif %}" 
-                 class="rounded-circle mx-auto mb-2 border border-danger object-fit-cover" 
-                 width="80" height="80" 
-                 alt="{{ u.full_name }}"
-                 onerror="this.onerror=null; this.src='{{ url_for('static', filename='default.png') }}';">
-            
-            <h5 class="fw-bold mb-1 text-danger">{{ u.full_name }}</h5>
-            <span class="badge bg-secondary mb-2">{{ u.branch }}</span>
-            <p class="small text-muted mb-0">ابن: {{ u.father_name or 'غير محدد' }}</p>
-            <span class="badge bg-warning text-dark mt-2">{{ u.title_type }}</span>
-        </div>
+
+<!-- أبناء وفروع الكواهلة -->
+<section>
+
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
+
+        <h2 class="h4 text-danger fw-bold mb-0">
+
+            <i class="fas fa-users text-warning me-2"></i>
+
+            أبناء وفروع الكواهلة
+
+        </h2>
+
+        <span class="badge bg-danger">
+            شجرة الأنساب
+        </span>
+
     </div>
 
-    <!-- نافذة منبثقة تفاعلية عند الضغط على صورة الشخص -->
-    <div class="modal fade" id="userModal{{ u.id }}" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content text-start">
-          <div class="modal-header bg-danger text-white">
-            <h5 class="modal-title">تفاصيل نسب الكاهلي</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body text-center">
-            
-            <!-- صورة النافذة المنبثقة: تدعم روابط ImgBB والملفات المحلية -->
-            <img src="{% if u.profile_pic %}{% if u.profile_pic.startswith('http') %}{{ u.profile_pic }}{% else %}{{ url_for('static', filename='uploads/' + u.profile_pic) }}{% endif %}{% else %}{{ url_for('static', filename='default.png') }}{% endif %}" 
-                 class="rounded-circle border border-danger mb-3 object-fit-cover" 
-                 width="100" height="100" 
-                 alt="{{ u.full_name }}"
-                 onerror="this.onerror=null; this.src='{{ url_for('static', filename='default.png') }}';">
-            
-            <h4 class="text-danger fw-bold">{{ u.full_name }}</h4>
-            <p class="mb-1"><strong>النسب الكامل:</strong> {{ u.full_name }} ابن {{ u.father_name or '...' }} ابن {{ u.grandfather_name or '...' }} - فرع {{ u.branch }}</p>
-            <p class="mb-1"><strong>فرع القبيلة:</strong> {{ u.branch }}</p>
-            <p class="mb-1"><strong>مكان السكن:</strong> {{ u.residence }}</p>
-            <span class="badge bg-danger fs-6 mt-2">{{ u.title_type }}</span>
-          </div>
+
+    <div class="row text-center">
+
+        {% for u in users %}
+
+        <div class="col-md-3 mb-4">
+
+            <div class="card p-3 shadow-sm border-top border-danger border-4 h-100"
+                 style="cursor: pointer;"
+                 data-bs-toggle="modal"
+                 data-bs-target="#userModal{{ u.id }}"
+                 role="button"
+                 tabindex="0"
+                 aria-label="عرض نسب {{ u.full_name }}">
+
+                <!-- صورة الشخص -->
+                <img src="{% if u.profile_pic %}{% if u.profile_pic.startswith('http') %}{{ u.profile_pic }}{% else %}{{ url_for('static', filename='uploads/' + u.profile_pic) }}{% endif %}{% else %}{{ url_for('static', filename='default.png') }}{% endif %}"
+                     class="rounded-circle mx-auto mb-2 border border-danger object-fit-cover"
+                     width="80"
+                     height="80"
+                     alt="صورة {{ u.full_name }} من أبناء الكواهلة"
+                     loading="lazy"
+                     onerror="this.onerror=null; this.src='{{ url_for('static', filename='default.png') }}';">
+
+                <h3 class="h5 fw-bold mb-1 text-danger">
+                    {{ u.full_name }}
+                </h3>
+
+                <span class="badge bg-secondary mb-2">
+                    {{ u.branch }}
+                </span>
+
+                <p class="small text-muted mb-0">
+                    ابن: {{ u.father_name or 'غير محدد' }}
+                </p>
+
+                <span class="badge bg-warning text-dark mt-2">
+                    {{ u.title_type }}
+                </span>
+
+            </div>
+
         </div>
-      </div>
+
+
+        <!-- النافذة المنبثقة -->
+        <div class="modal fade"
+             id="userModal{{ u.id }}"
+             tabindex="-1"
+             aria-hidden="true">
+
+            <div class="modal-dialog">
+
+                <div class="modal-content text-start">
+
+                    <div class="modal-header bg-danger text-white">
+
+                        <h2 class="h5 modal-title">
+                            تفاصيل نسب الكاهلي
+                        </h2>
+
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="إغلاق">
+                        </button>
+
+                    </div>
+
+
+                    <div class="modal-body text-center">
+
+                        <!-- صورة النافذة -->
+                        <img src="{% if u.profile_pic %}{% if u.profile_pic.startswith('http') %}{{ u.profile_pic }}{% else %}{{ url_for('static', filename='uploads/' + u.profile_pic) }}{% endif %}{% else %}{{ url_for('static', filename='default.png') }}{% endif %}"
+                             class="rounded-circle border border-danger mb-3 object-fit-cover"
+                             width="100"
+                             height="100"
+                             alt="صورة {{ u.full_name }}"
+                             loading="lazy"
+                             onerror="this.onerror=null; this.src='{{ url_for('static', filename='default.png') }}';">
+
+
+                        <h3 class="h4 text-danger fw-bold">
+                            {{ u.full_name }}
+                        </h3>
+
+
+                        <p class="mb-1">
+                            <strong>النسب الكامل:</strong>
+                            {{ u.full_name }}
+                            ابن {{ u.father_name or '...' }}
+                            ابن {{ u.grandfather_name or '...' }}
+                            - فرع {{ u.branch }}
+                        </p>
+
+
+                        <p class="mb-1">
+                            <strong>فرع القبيلة:</strong>
+                            {{ u.branch }}
+                        </p>
+
+
+                        <p class="mb-1">
+                            <strong>مكان السكن:</strong>
+                            {{ u.residence }}
+                        </p>
+
+
+                        <span class="badge bg-danger fs-6 mt-2">
+                            {{ u.title_type }}
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
     </div>
-    {% endfor %}
-</div>
+
+</section>
+
+
+<!-- روابط داخلية مهمة للـSEO -->
+<section class="row text-center mt-5">
+
+    <div class="col-md-4 mb-3">
+
+        <a href="{{ url_for('index') }}"
+           class="btn btn-outline-danger w-100 fw-bold">
+
+            <i class="fas fa-home me-1"></i>
+
+            موقع قبيلة الكواهلة
+
+        </a>
+
+    </div>
+
+
+    <div class="col-md-4 mb-3">
+
+        <a href="{{ url_for('leaders') }}"
+           class="btn btn-outline-warning text-dark w-100 fw-bold">
+
+            <i class="fas fa-crown me-1"></i>
+
+            أمراء وقيادات الكواهلة
+
+        </a>
+
+    </div>
+
+
+    <div class="col-md-4 mb-3">
+
+        <a href="{{ url_for('forum') }}"
+           class="btn btn-outline-danger w-100 fw-bold">
+
+            <i class="fas fa-comments me-1"></i>
+
+            منتدى الكواهلة
+
+        </a>
+
+    </div>
+
+</section>
+
+
 {% endblock %}
