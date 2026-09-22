@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import os
+from urllib.parse import quote_plus
 
 from bson.objectid import ObjectId
 from flask import (
@@ -34,8 +35,11 @@ app.config["SECRET_KEY"] = "kawahla_secret_key_2026_super_secure"
 # إعداد اتصال MongoDB السحابي
 # =========================================================
 
+MONGO_USERNAME = "kawahla"
+MONGO_PASSWORD = quote_plus("Fad%[400911923356")
+
 app.config["MONGO_URI"] = (
-    "mongodb+srv://kawahla:Fad%[400911923356@cluster0.outspyb.mongodb.net/"
+    f"mongodb+srv://{MONGO_USERNAME}:{MONGO_PASSWORD}@cluster0.outspyb.mongodb.net/"
     "kawahla_db?retryWrites=true&w=majority&appName=Cluster0"
     "&tls=true&tlsAllowInvalidCertificates=true"
 )
